@@ -10,5 +10,5 @@ setup(name='ginterval',
       url='https://genome.whu.edu.cn',
       package_dir={'': 'src'},
       py_modules=["ginterval"],
-      requires=['pysam', 'biopython']
+      # requires=['pysam', 'biopython']
       )

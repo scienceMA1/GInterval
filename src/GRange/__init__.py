@@ -16,6 +16,9 @@ class Interval(object):
     def length(self):
         return self._end - self._start + 1
 
+    def __len__(self):
+        return self.length
+
 
 class IntervalList(object):
     def __init__(self, intervals=None):
@@ -31,6 +34,10 @@ class IntervalList(object):
 
     def __len__(self):
         return len(self._intervals)
+
+    @property
+    def length(self):
+        return sum([interval.length for interval in self._intervals])
 
 
 class GInterval(Interval):
@@ -54,6 +61,10 @@ class GInterval(Interval):
     @property
     def forward(self):
         return self._strand == '+'
+
+    @property
+    def reverse(self):
+        return self._strand == '-'
 
     @property
     def score(self):
@@ -96,11 +107,31 @@ class GInterval(Interval):
 
 
 class GMultiInterval(GInterval):
-    def __init__(self, chrom=None, start=0, end=0, strand=None, intervals=None, *args, **kwargs):
+    def __init__(self, chrom=None, start=0, end=0, strand=None, interval_list=None, *args, **kwargs):
         super(GMultiInterval, self).__init__(chrom, start, end, strand, *args, **kwargs)
-        self._intervals = intervals
-        if self._intervals is None:
-            self._intervals = IntervalList()
+        self._interval_list = interval_list
+        if self._interval_list is None:
+            self._interval_list = IntervalList()
+
+    @property
+    def length(self):
+        return self._intervals.length
+
+    def get_index(self, position, strand=True):
+        index = 0
+        for interval in self._interval_list:
+            if interval.end < position:
+                index += interval.length
+                continue
+            elif interval.start <= position <= interval.end:
+                index += position - interval.start
+            else:
+                raise Exception("Position [%d] is not inside this GMultiInterval" % position)
+        if strand and self.reverse:
+            return self.length - index
+
+    def get_position(self, index, strand=True):
+        pass
 
 
 class GComplexInterval(GMultiInterval):
