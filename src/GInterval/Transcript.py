@@ -1,43 +1,88 @@
-from GInterval import GInterval
-
-
-def has_thick(gi):
-    return gi.thick is not None
+from GInterval.IO import ParserFactory
+import numpy as np
 
 
 class TranscriptAnalysis(object):
-    def __init__(self):
-        self.five_utr_lengths = []
-        self.cds_lengths = []
-        self.three_utr_lengths = []
-        self.has_thick_count = 0
-        self.total_count = 0
-        self.without_thick_count = 0
+    def __init__(self, raw_data=None, fmt=None, processed_data=None):
+        self.data = None
 
-    def process(self, gi):
-        self.total_count += 1
-        if has_thick(gi):
-            if gi.name == 'uc009ski.1':
-                for block in gi.blocks:
-                    print(block)
-            self.has_thick_count += 1
-            length1 = gi.get_thin_length_1(strand_sensitive=True, block_sensitive=True)
-            length2 = gi.get_thick_length(block_sensitive=True)
-            length3 = gi.get_thin_length_2(strand_sensitive=True, block_sensitive=True)
-            self.five_utr_lengths.append(length1)
-            self.cds_lengths.append(length2)
-            self.three_utr_lengths.append(length3)
+        self.__length1 = []
+        self.__length2 = []
+        self.__length3 = []
+        self.__names = []
+        self.header = ['Name', '5UTR', 'CDS', '3UTR']
+
+        self.count_total = 0
+        self.count_thick = 0
+        self.count_without_thick = 0
+
+        if raw_data is not None:
+            for record in ParserFactory(raw_data, fmt).parser:
+                self.__process(record)
+            self.__after_process()
+        if processed_data is not None:
+            pass
+
+    def __process(self, record):
+        self.count_total += 1
+        name = record.name
+        length1 = None
+        length2 = None
+        length3 = None
+
+        if record.thick is None:
+            self.count_without_thick += 1
 
         else:
-            self.without_thick_count += 1
+            self.count_thick += 1
+            length1 = record.get_thin_length_1()
+            length2 = record.get_thick_length()
+            length3 = record.get_thin_length_2()
+        self.__names.append(name)
+        self.__length1.append(length1)
+        self.__length2.append(length2)
+        self.__length3.append(length3)
+
+    def __after_process(self):
+        import pandas as pd
+        self.data = pd.DataFrame(index=self.__names, data={
+            self.header[1]: self.__length1,
+            self.header[2]: self.__length2,
+            self.header[3]: self.__length3
+        })
+        self.data.index.name = self.header[0]
+        self.__names = None
+        self.__length1 = None
+        self.__length2 = None
+        self.__length3 = None
+
+    def __str__(self):
+        lines = []
+        lines.append('Total input record: %d' % self.count_total)
+        lines.append('Record with thick interval: %d (%.2f%%)' %
+                     (self.count_thick, self.count_thick * 100 / self.count_total))
+        lines.append('Record without thick interval: %d (%.2f%%)' %
+                     (self.count_without_thick, self.count_without_thick * 100 / self.count_total))
+        lines.append('Average 5UTR length: %.2f' % np.mean(self.data['5UTR']))
+        lines.append('Average CDS length: %.2f' % np.mean(self.data['CDS']))
+        lines.append('Average 3UTR length: %.2f' % np.mean(self.data['3UTR']))
+        return "\n".join(lines)
+
+    def plot(self, output=None):
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(4, 3))
+        data = self.data[self.data[self.header[1]].notnull()]
+        plt.boxplot([data['5UTR'].values, data['CDS'].values, data['3UTR'].values], showfliers=False)
+        plt.xticks(range(1, 4), self.header[1:])
+        plt.tight_layout()
+        if output is None:
+            plt.show()
+        else:
+            plt.savefig(output, dpi=300)
+        plt.close()
+
 
 if __name__ == '__main__':
-    from GInterval.IO import parser
-    import numpy as np
-    ta = TranscriptAnalysis()
-    for record in parser("../data/mm9_knownGene.bed", "bed"):
-        #print(GInterval.to_bed_format_string(record))
-        ta.process(record)
-    print(np.mean(ta.five_utr_lengths))
-    print(np.mean(ta.cds_lengths))
-    print(np.mean(ta.three_utr_lengths))
+    ta = TranscriptAnalysis("../data/mm9_knownGene.bed")
+    print(ta)
+    ta.plot("../data/transcript.png")
