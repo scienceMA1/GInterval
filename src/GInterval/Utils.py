@@ -1,7 +1,4 @@
-
-class ShiftLoader(object):
-    pass
-
+from GInterval.IO import ParserFactory
 
 class SequenceExtractor(object):
     pass
