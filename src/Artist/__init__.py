@@ -30,7 +30,7 @@ def draw_shift_on_reference(data, output=None, tas=None,
     if title is None:
         title = "The distribution of shift intervals inside reference intervals"
     if ticks is None:
-        ticks = ["5`Cap", "Start Codon", "Stop Codon", "Poly A"]
+        ticks = ["5Cap", "Start Codon", "Stop Codon", "PolyA"]
     if labels is None:
         labels = list(map(str, range(len(data))))
     if not isinstance(labels, list):
@@ -150,7 +150,7 @@ def draw_shift_on_reference(data, output=None, tas=None,
     if output is None:
         plt.show()
     else:
-        plt.savefig(output)
+        plt.savefig(output, dip=300)
     plt.close()
 
 if __name__ == '__main__':
@@ -158,6 +158,54 @@ if __name__ == '__main__':
     from Calculator import cal_shift_inside_reference
 
     if True:
+        references = ['../data/RFP_inputRNA_TE_Class%d.sorted.bed' % i for i in range(1, 4)]
+        shift = '../data/GSE49339_A-PARCLIP.sorted.bed'
+        transcripts = [TranscriptAnalysis.get_summary(reference, fmt='BED',
+                                                      summary='../data/RFP_inputRNA_TE_Class%d.txt' % (i + 1))
+                       for i, reference in enumerate(references)]
+        distributions = ["../data/RFP_inputRNA_TE_Class%d_YTHDF2.txt" % i for i in range(1, 4)]
+        # for distribution, reference in zip(distributions, references):
+        # cal_shift_inside_reference(shift, reference, distribution, strand_sensitive=False)
+        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
+                                output='../data/RFP_inputRNA_TE_YTHDF2.png')
+
+    if False:
+        references = ['../data/RFP_inputRNA_TE_Class%d.sorted.bed' % i for i in range(1, 4)]
+        shift = '../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed'
+        transcripts = [TranscriptAnalysis.get_summary(reference, fmt='BED',
+                                                      summary='../data/RFP_inputRNA_TE_Class%d.txt' % (i + 1))
+                       for i, reference in enumerate(references)]
+        distributions = ["../data/RFP_inputRNA_TE_Class%d_m6A.txt" % i for i in range(1, 4)]
+        # for distribution, reference in zip(distributions, references):
+        #    cal_shift_inside_reference(shift, reference, distribution, strand_sensitive=False)
+        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
+                                output='../data/RFP_inputRNA_TE_m6A.png')
+
+    if False:
+        references = ['../data/P-Body-Enrichment_Class%d.sorted.bed' % i for i in range(1, 4)]
+        shift = '../data/GSE49339_A-PARCLIP.sorted.bed'
+        transcripts = [TranscriptAnalysis.get_summary(reference, fmt='BED',
+                                                      summary='../data/P-Body-Enrichment_Class%d.txt' % (i + 1))
+                       for i, reference in enumerate(references)]
+        distributions = ["../data/P-Body-Enrichment_Class%d_YTHDF2.txt" % i for i in range(1, 4)]
+        # for distribution, reference in zip(distributions, references):
+        #    cal_shift_inside_reference(shift, reference, distribution, strand_sensitive=False)
+        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
+                                output='../data/P-Body-Enrichment_YTHDF2.png')
+
+    if False:
+        references = ['../data/P-Body-Enrichment_Class%d.sorted.bed' % i for i in range(1, 4)]
+        shift = '../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed'
+        transcripts = [TranscriptAnalysis.get_summary(reference, fmt='BED',
+                                                      summary='../data/P-Body-Enrichment_Class%d.txt' % (i + 1))
+                       for i, reference in enumerate(references)]
+        distributions = ["../data/P-Body-Enrichment_Class%d_m6A.txt" % i for i in range(1, 4)]
+        # for distribution, reference in zip(distributions, references):
+        #    cal_shift_inside_reference(shift, reference, distribution, strand_sensitive=False)
+        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
+                                output='../data/P-Body-Enrichment_m6A.png')
+
+    if False:
         shift = "../data/random.bed"
         reference = "../data/hg19_knownGene.bed"
         cpath = "../data/hg19_knownGene_random.bed"
@@ -165,54 +213,3 @@ if __name__ == '__main__':
         ta = TranscriptAnalysis.get_summary(reference, summary=tpath)
         dat = cal_shift_inside_reference(spath=shift, rpath=reference, opath=cpath, strand_sensitive=False)
         draw_shift_on_reference(dat, tas=[ta])
-
-    exit(0)
-    '''draw_shift_on_reference(spath=[
-        '../data/hg19_knownGene_random.bed'
-    ], tas=[TranscriptAnalysis(sfile='../data/hg19_knownGene.transcript')], norms=[1], bcount=50)'''
-
-    '''draw_shift_on_reference(spath=[
-        '../data/RFP_inputRNA_TE_Class1_m6A.bed',
-        '../data/RFP_inputRNA_TE_Class2_m6A.bed',
-        '../data/RFP_inputRNA_TE_Class3_m6A.bed'
-    ], tas=[
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class1.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class2.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class3.transcript')
-    ], bcount=10)'''
-
-    '''draw_shift_on_reference(spath=[
-        '../data/hg19_knownGene_m6A.bed'
-    ], tas=[
-        TranscriptAnalysis(sfile='../data/hg19_knownGene.transcript')
-    ], bcount=20)'''
-
-    draw_shift_on_reference(data=[
-        '../data/P-Body-Enrichment_Class1_m6A.bed',
-        '../data/P-Body-Enrichment_Class2_m6A.bed',
-        '../data/P-Body-Enrichment_Class3_m6A.bed'
-    ], tas=[
-        TranscriptAnalysis(sfile='../data/P-Body-Enrichment_Class1.transcript'),
-        TranscriptAnalysis(sfile='../data/P-Body-Enrichment_Class2.transcript'),
-        TranscriptAnalysis(sfile='../data/P-Body-Enrichment_Class3.transcript')
-    ], bcount=20)
-
-    '''draw_shift_on_reference(spath=[
-        '../data/RFP_inputRNA_TE_Class1_random.bed',
-        '../data/RFP_inputRNA_TE_Class2_random.bed',
-        '../data/RFP_inputRNA_TE_Class3_random.bed'
-    ], tas=[
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class1.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class2.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class3.transcript')
-    ], norms=[1], bcount=50)'''
-
-    '''draw_shift_on_reference(spath=[
-        '../data/RFP_inputRNA_TE_Class1_random.bed',
-        '../data/RFP_inputRNA_TE_Class2_random.bed',
-        '../data/RFP_inputRNA_TE_Class3_random.bed'
-    ], tas=[
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class1.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class2.transcript'),
-        TranscriptAnalysis(sfile='../data/RFP_inputRNA_TE_Class3.transcript')
-    ], bcount=50)'''
