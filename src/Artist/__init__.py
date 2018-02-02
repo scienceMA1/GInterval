@@ -153,6 +153,7 @@ def draw_shift_on_reference(data, output=None, tas=None,
         plt.savefig(output, dip=300)
     plt.close()
 
+
 if __name__ == '__main__':
     from GInterval.Transcript import TranscriptAnalysis
     from Calculator import cal_shift_inside_reference
@@ -166,8 +167,9 @@ if __name__ == '__main__':
         distributions = ["../data/RFP_inputRNA_TE_Class%d_YTHDF2.txt" % i for i in range(1, 4)]
         # for distribution, reference in zip(distributions, references):
         # cal_shift_inside_reference(shift, reference, distribution, strand_sensitive=False)
-        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
-                                output='../data/RFP_inputRNA_TE_YTHDF2.png')
+        #draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10,
+        #                        output='../data/RFP_inputRNA_TE_YTHDF2.png')
+        draw_shift_on_reference(data=distributions, tas=transcripts, bcount=10)
 
     if False:
         references = ['../data/RFP_inputRNA_TE_Class%d.sorted.bed' % i for i in range(1, 4)]

@@ -128,4 +128,7 @@ class TranscriptAnalysis(object):
 
 
 if __name__ == '__main__':
+    ta = TranscriptAnalysis("../data/hg19_knownGene.bed")
+    print(ta)
+    ta.plot()
     pass

@@ -5,6 +5,35 @@ def cal_shift_around_anchor():
     pass
 
 
+def duxian(read1, read2, transcript):
+    trans1 = ShiftLoader(transcript, fmt="BED")
+    trans2 = ShiftLoader(transcript, fmt="BED")
+    for r1, r2 in zip(ParserFactory(path=read1, fmt='BED').parser,
+                      ParserFactory(path=read2, fmt='BED').parser):
+        s1 = trans1.get_shifts(r1, extend=0)
+        s2 = trans2.get_shifts(r2, extend=0)
+        s1 = list(filter(lambda x: x.strand == r1.strand, s1))
+        s2 = list(filter(lambda x: x.strand != r2.strand, s2))
+
+        names = [s.name for s in s1]
+        ts = filter(lambda x: x.name in names, s2)
+
+        x = min(r1.x, r2.x)
+        y = max(r1.y, r2.y)
+
+        for t in ts:
+            print('============================================')
+            print(r1.to_bed_format_string())
+            print(r2.to_bed_format_string())
+            print(t.to_bed_format_string())
+            nt = t[x:y]
+            if nt is not None:
+                print(nt.to_bed_format_string())
+            else:
+                raise Exception()
+
+
+
 def cal_shift_inside_reference(spath, rpath, opath, sfmt=None, rfmt=None, extend=0, strand_sensitive=True):
     number = 0
     with open(opath, "w+") as fw:
