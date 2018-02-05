@@ -35,33 +35,33 @@ class GInterval(object):
         self._y = y
         self._annotations = kwargs
 
-        self._blocks = None
+        self._block_info = None
         if blocks is None:
             if self._x is not None and self._y is not None:
-                self._blocks = [self._x, self._y]
+                self._block_info = [self._x, self._y]
             else:
                 raise ValueError("The x and y or blocks must be provided!")
         else:
             if isinstance(blocks, list) or isinstance(blocks, np.ndarray):
-                self._blocks = []
+                self._block_info = []
                 for x0, y0 in blocks:
                     if not x0 < y0:
                         raise ValueError("The block.x value must be smaller than block.y value.")
-                    self._blocks.append(x0)
-                    self._blocks.append(y0)
+                    self._block_info.append(x0)
+                    self._block_info.append(y0)
                 lp = None
-                for p in self._blocks:
+                for p in self._block_info:
                     if lp is not None and p < lp:
                         raise ValueError("The position values of blocks are not sorted by oder.")
                     lp = p
-                if len(self._blocks) < 2:
+                if len(self._block_info) < 2:
                     raise ValueError("Too little blocks position!")
 
                 if self._x is None or self._y is None:
-                    self._x = self._blocks[0]
-                    self._y = self._blocks[-1]
+                    self._x = self._block_info[0]
+                    self._y = self._block_info[-1]
                 else:
-                    if self._x != self._blocks[0] or self._y != self._blocks[-1]:
+                    if self._x != self._block_info[0] or self._y != self._block_info[-1]:
                         raise ValueError("The x, y position of GInterval is not consistent with blocks range!")
             else:
                 raise ValueError("Invalid blocks values!")
@@ -135,18 +135,18 @@ class GInterval(object):
 
     @property
     def blocks(self):
-        for i in range(0, len(self._blocks), 2):
-            yield (self._blocks[i], self._blocks[i + 1])
+        for i in range(0, len(self._block_info), 2):
+            yield (self._block_info[i], self._block_info[i + 1])
 
     @property
     def block_count(self):
-        return len(self._blocks) // 2
+        return len(self._block_info) // 2
 
     @property
     def gaps(self):
-        if self._blocks is not None:
-            for i in range(1, len(self._blocks) - 2, 2):
-                yield (self._blocks[i], self._blocks[i + 1])
+        if self._block_info is not None:
+            for i in range(1, len(self._block_info) - 2, 2):
+                yield (self._block_info[i], self._block_info[i + 1])
 
     def set_strand_sensitivity(self, sensitivity=True):
         self._annotations.setdefault('strand_backup', self._annotations.get('strand'))
@@ -192,14 +192,17 @@ class GInterval(object):
             return GInterval(blocks=blocks, thick=thick, **self._annotations)
 
         elif isinstance(item, int):
-            return self.index(item)
+            return self.position(item)
         else:
             raise TypeError("The type of item is not supported!")
 
     def __add__(self, other):
-        """
-
-        The strand of other will be ignored.
+        """Rewrite the operation of GInterval plus GInterval.
+        In fact, it is a process that all blocks merge together.
+        The overlapped blocks will be combined to one.
+        The thick will be combine if exist.
+        The annotation information will be the same as left one.
+        The annotation information of `other` will be ignored.
 
         :param other:
         :return:
@@ -254,27 +257,19 @@ class GInterval(object):
         return self._annotations.get(item)
 
     def overlap(self, other):
+        """
+        The overlap of GInterval without blocks considered.
+        :param other:
+        :return:
+        """
         return max(self._x, other.x) < min(self._y.other.y)
-        '''
-        blocks1 = list(other.blocks)
-        blocks2 = list(self.blocks)
-        i1 = 0
-        i2 = 0
-        mi1 = len(blocks1)
-        mi2 = len(blocks2)
-        while i1 < mi1 and i2 < mi2:
-            b1 = blocks1[i1]
-            b2 = blocks2[i2]
-            if b1.y <= b2.x:
-                i1 += 1
-            elif b1.x >= b2.y:
-                i2 += 1
-            else:
-                return True
-        return False
-        '''
 
     def contain(self, other):
+        """
+        The bases of other are all in self block intervals.
+        :param other:
+        :return:
+        """
         blocks1 = self.combine_adjacent(self.blocks)
         blocks2 = self.combine_adjacent(other.blocks)
 
@@ -295,23 +290,54 @@ class GInterval(object):
         return True
 
     def coincide(self, other):
+        """
+        The other block interval is a continuous subset of self.
+        :param other:
+        :return:
+        """
         if not (self._x <= other.x and self._y >= other.y):
             return False
 
-        if len(other.blocks) == 1:
-            return self.contain(other)
+        blocks1 = self.blocks
+        blocks2 = other.blocks
 
-        gaps1 = self.gaps
-        gaps2 = other.gaps
-        if len(gaps1) == len(gaps2) == 0:
-            return True
+        x2, y2 = next(blocks2)
+        meet = False
+        left = False
+        allow_next = True
+        for x1, y1 in blocks1:
+            if max(x1, x2) < min(y1, y2):
+                meet = True
+                if x1 <= x2 and y1 >= y2:
+                    allow_next = (y1 == y2)
 
-        if len(gaps1) < len(gaps2):
+
+
+        #blocks1 = list(self.blocks)
+        #blocks2 = list(other.blocks)
+        #if len(blocks2) == 1:
+        #    return self.contain(other)
+
+        gaps1 = list(self.gaps)
+        gaps2 = list(other.gaps)
+        len1 = len(gaps1)
+        len2 = len(gaps2)
+        if len2 == 0:
+            if len1 == 0:
+                return True
+            else:
+                return self.contain(other)
+
+        if len1 < len2:
+            return False
+
+        if not self.contain(other):
             return False
 
         start = None
         g2 = gaps2[0]
-        for i, g1 in enumerate(gaps1):
+        for i, block in enumerate(gaps1):
+            x, y = block
             if g1.x == g2.x and g1.y == g2.y:
                 start = i
                 break
@@ -330,15 +356,20 @@ class GInterval(object):
         return True
 
     def index(self, position):
+        """
+        The 0-base and strand-specific index correspond to specific position.
+        :param position:
+        :return:
+        """
         if not self._x <= position < self._y:
             raise ValueError('Invalid position %d' % position)
         index = 0
-        for block in self.blocks:
-            if block._y <= position:
-                index += len(block)
+        for x, y in self.blocks:
+            if y <= position:
+                index += (y-x)
                 continue
-            elif block._x <= position < block._y:
-                index += position - block._x
+            elif x <= position < y:
+                index += position - x
                 break
             else:
                 raise ValueError('')
@@ -347,18 +378,24 @@ class GInterval(object):
         return index
 
     def position(self, index):
+        """
+        The genomic position of specific strand-specific index.
+        :param index:
+        :return:
+        """
         end_index = len(self) - 1
         min_index = -(end_index + 1)
         if not min_index <= index <= end_index:
-            raise ValueError('Invalid index %d' % index)
+            raise ValueError('Invalid index %d. The valid index range is [%d:%d]' %
+                             (index, min_index, end_index))
         if index < 0:
             index -= min_index
         if self.reverse:
             index = end_index - index
-        for block in self.blocks:
-            index -= len(block)
+        for x, y in self.blocks:
+            index -= (y-x)
             if index < 0:
-                return block._y + index
+                return y + index
         raise Exception('Unknown Exception!')
 
     # Additional methods.
@@ -397,17 +434,19 @@ class GInterval(object):
 
     @property
     def thick_start_position(self):
+        x, y = self._thick
         if self.forward:
-            return self.thick.x
+            return x
         else:
-            return self.thick.y - 1
+            return y - 1
 
     @property
     def thick_end_position(self):
+        x, y = self._thick
         if self.forward:
-            return self.thick.y - 1
+            return y - 1
         else:
-            return self.thick.x
+            return x
 
     @property
     def thick_start_index(self):

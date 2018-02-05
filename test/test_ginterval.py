@@ -1,5 +1,3 @@
-#from __future__ import absolute_import
-#import nose
 from ginterval import GInterval
 
 
@@ -25,8 +23,8 @@ def test_ginterval():
     assert gi.start_index == 0
     assert gi.end_index == 39
 
-    intervals = [GInterval(10, 20), GInterval(30, 35), GInterval(50, 65)]
-    gi = GInterval(chrom='chr2', name='GInterval2', strand='-', blocks=intervals)
+    blocks = [(10, 20), (30, 35), (50, 65)]
+    gi = GInterval(chrom='chr2', name='GInterval2', strand='-', blocks=blocks)
 
     assert gi.start_index == 0
     assert gi.end_index == 29
@@ -40,28 +38,28 @@ def test_ginterval():
 
     assert gi.position(29) == 10
 
-    intervals = [GInterval(10, 20), GInterval(30, 35), GInterval(50, 65)]
-    thick = GInterval(15, 60)
+    intervals = [(10, 20), (30, 35), (50, 65)]
+    thick = (15, 60)
     gi = GInterval(chrom='chr2', name='GInterval2', strand='-', blocks=intervals, thick=thick, rgb='read')
 
     assert gi.thick_start_position == 59
     assert gi.thick_end_position == 15
     assert gi.thick_start_index == 5
     assert gi.thick_end_index == 24
-    assert gi['red'] is None
+    assert gi.red is None
 
     g1 = gi[10:31]
     assert len(g1) == 11
 
-    g1 = GInterval(blocks=[GInterval(10, 20), GInterval(20, 22), GInterval(100, 200)])
+    g1 = GInterval(blocks=[(10, 20), (20, 22), (100, 200)])
     g2 = GInterval(25, 27, chrom='chr2', name='GInterval2', strand='-', rgb='read')
     g3 = g1 + g2
     assert len(g3) == 114
 
-    g1 = GInterval(blocks=[GInterval(10, 20), GInterval(30, 50), GInterval(90, 100)])
-    g2 = GInterval(blocks=[GInterval(40, 50), GInterval(90, 95)])
+    g1 = GInterval(blocks=[(10, 20), (30, 50), (90, 100)])
+    g2 = GInterval(blocks=[(40, 50), (90, 95)])
     assert g1.coincide(g2)
 
-    g1 = GInterval(blocks=[GInterval(10, 20), GInterval(30, 50), GInterval(90, 100)])
-    g2 = GInterval(blocks=[GInterval(40, 52), GInterval(90, 95)])
+    g1 = GInterval(blocks=[(10, 20), (30, 50), (90, 100)])
+    g2 = GInterval(blocks=[(40, 52), (90, 95)])
     assert not g1.coincide(g2)
