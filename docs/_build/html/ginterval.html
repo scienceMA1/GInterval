@@ -115,11 +115,6 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 </dd></dl>
 
-<dl class="function">
-<dt id="ginterval.io.write">
-<code class="descclassname">ginterval.io.</code><code class="descname">write</code><span class="sig-paren">(</span><em>f</em>, <em>obj</em>, <em>fmt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.write" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </div>
 <div class="section" id="module-ginterval.transcript">
 <span id="ginterval-transcript-module"></span><h2>ginterval.transcript module<a class="headerlink" href="#module-ginterval.transcript" title="Permalink to this headline">¶</a></h2>
@@ -186,33 +181,60 @@
 </div>
 <div class="section" id="module-ginterval">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ginterval" title="Permalink to this headline">¶</a></h2>
-<p>GInterval module.</p>
-<p>This module support the</p>
-<p class="rubric">Example</p>
-<p>g = GInterval(10, 20, chrom=”chr1”, name=”peak_01”, strand=”+”)</p>
+<p>GInterval object represent a interval on the genomic coordination.
+It can consist many blocks (smaller interval which only contain x and y value).
+Additional information, such as chromosome, name and strand, are also contained in the GInterval objects.</p>
 <dl class="class">
 <dt id="ginterval.GInterval">
 <em class="property">class </em><code class="descclassname">ginterval.</code><code class="descname">GInterval</code><span class="sig-paren">(</span><em>x=None</em>, <em>y=None</em>, <em>blocks=None</em>, <em>thick=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>The summary line for a class docstring should fit on one line.</p>
-<p>If the class has public attributes, they may be documented here
-in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
-function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
-inline with the attribute’s declaration (see __init__ method below).</p>
-<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
-in the property’s getter method.</p>
+<p>GInterval is the basic element interval represent a range of genomic.</p>
 <dl class="attribute">
-<dt id="ginterval.GInterval.attr1">
-<code class="descname">attr1</code><a class="headerlink" href="#ginterval.GInterval.attr1" title="Permalink to this definition">¶</a></dt>
-<dd><p><em>str</em> – Description of <cite>attr1</cite>.</p>
+<dt id="ginterval.GInterval.x">
+<code class="descname">x</code><a class="headerlink" href="#ginterval.GInterval.x" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – The start position (0-base, included) of the interval.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ginterval.GInterval.attr2">
-<code class="descname">attr2</code><a class="headerlink" href="#ginterval.GInterval.attr2" title="Permalink to this definition">¶</a></dt>
-<dd><p><code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional – Description of <cite>attr2</cite>.</p>
+<dt id="ginterval.GInterval.y">
+<code class="descname">y</code><a class="headerlink" href="#ginterval.GInterval.y" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> – The end position (0-base, excluded) of the interval.</p>
 </dd></dl>
 
+<dl class="attribute">
+<dt id="ginterval.GInterval.chrom">
+<code class="descname">chrom</code><a class="headerlink" href="#ginterval.GInterval.chrom" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The chromosome on which the interval is located.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.name">
+<code class="descname">name</code><a class="headerlink" href="#ginterval.GInterval.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The name of the interval.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.strand">
+<code class="descname">strand</code><a class="headerlink" href="#ginterval.GInterval.strand" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – The value is “+” or “-“.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.forward">
+<code class="descname">forward</code><a class="headerlink" href="#ginterval.GInterval.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>boolean</em> – True when the strand is “+”.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.reverse">
+<code class="descname">reverse</code><a class="headerlink" href="#ginterval.GInterval.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>boolean</em> – True when the strand is “-“.</p>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<p>Create a GInterval instance before any operation:</p>
+<p>g = GInterval(10, 20)</p>
+<p>g = GInterval(blocks=[10, 20, 30, 40])</p>
 <dl class="attribute">
 <dt id="ginterval.GInterval.blocks">
 <code class="descname">blocks</code><a class="headerlink" href="#ginterval.GInterval.blocks" title="Permalink to this definition">¶</a></dt>
@@ -226,11 +248,6 @@ in the property’s getter method.</p>
 <dl class="attribute">
 <dt id="ginterval.GInterval.center_position">
 <code class="descname">center_position</code><a class="headerlink" href="#ginterval.GInterval.center_position" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ginterval.GInterval.chrom">
-<code class="descname">chrom</code><a class="headerlink" href="#ginterval.GInterval.chrom" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -259,9 +276,10 @@ in the property’s getter method.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ginterval.GInterval.forward">
-<code class="descname">forward</code><a class="headerlink" href="#ginterval.GInterval.forward" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt>
+<code class="descname">forward</code></dt>
+<dd><p><em>return</em> – True when the strand equal to “+”</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ginterval.GInterval.gaps">
@@ -278,11 +296,6 @@ in the property’s getter method.</p>
 <code class="descname">index</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="attribute">
-<dt id="ginterval.GInterval.name">
-<code class="descname">name</code><a class="headerlink" href="#ginterval.GInterval.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="method">
 <dt id="ginterval.GInterval.overlap">
 <code class="descname">overlap</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.overlap" title="Permalink to this definition">¶</a></dt>
@@ -294,9 +307,10 @@ in the property’s getter method.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ginterval.GInterval.reverse">
-<code class="descname">reverse</code><a class="headerlink" href="#ginterval.GInterval.reverse" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt>
+<code class="descname">reverse</code></dt>
+<dd><p><em>return</em> – True when the strand equal to “-“.</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ginterval.GInterval.set_strand_sensitivity">
@@ -314,9 +328,10 @@ in the property’s getter method.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ginterval.GInterval.strand">
-<code class="descname">strand</code><a class="headerlink" href="#ginterval.GInterval.strand" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt>
+<code class="descname">strand</code></dt>
+<dd><p><em>return</em> – The strand information of GInterval instance “+” or “-“. Default “+”</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ginterval.GInterval.thick_end_index">
@@ -344,65 +359,15 @@ in the property’s getter method.</p>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="ginterval.GInterval.x">
-<code class="descname">x</code><a class="headerlink" href="#ginterval.GInterval.x" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ginterval.GInterval.y">
-<code class="descname">y</code><a class="headerlink" href="#ginterval.GInterval.y" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<dt>
+<code class="descname">x</code></dt>
+<dd><p><em>return</em> – The x position (0-base included) of the interval instance.</p>
 </dd></dl>
 
-<dl class="class">
-<dt id="ginterval.IntervalTest">
-<em class="property">class </em><code class="descclassname">ginterval.</code><code class="descname">IntervalTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#IntervalTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.IntervalTest" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
-<dl class="method">
-<dt id="ginterval.IntervalTest.test_GInterval">
-<code class="descname">test_GInterval</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#IntervalTest.test_GInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.IntervalTest.test_GInterval" title="Permalink to this definition">¶</a></dt>
-<dd><p>i = ginterval(10, 20)
-self.assertEqual(len(i), 10)
-self.assertEqual(i.x, 10)
-self.assertEqual(i.y, 20)</p>
-<p>gi = ginterval(10, 50, chrom=’chr1’, name=’GInterval1’, strand=’-‘)</p>
-<p>self.assertEqual(len(gi), 40)</p>
-<p>gi.set_strand_sensitivity(False)
-self.assertEqual(gi.start_position, 10)
-self.assertEqual(gi.end_position, 49)
-self.assertEqual(gi.start_index, 0)
-self.assertEqual(gi.end_index, 39)</p>
-<p>gi.set_strand_sensitivity(True)
-self.assertEqual(gi.start_position, 49)
-self.assertEqual(gi.end_position, 10)
-self.assertEqual(gi.start_index, 0)
-self.assertEqual(gi.end_index, 39)</p>
-<p>intervals = [ginterval(10, 20), ginterval(30, 35), ginterval(50, 65)]
-gi = ginterval(chrom=’chr2’, name=’GInterval2’, strand=’-‘, blocks=intervals)</p>
-<p>self.assertEqual(gi.start_index, 0)
-self.assertEqual(gi.end_index, 29)
-self.assertEqual(len(gi), 30)</p>
-<p>self.assertEqual(gi.index(10), 29)
-gi.set_strand_sensitivity(False)
-self.assertEqual(gi.index(15), 5)
-gi.set_strand_sensitivity(True)
-self.assertEqual(gi.index(15), 24)</p>
-<p>self.assertEqual(gi.position(29), 10)</p>
-<p>intervals = [ginterval(10, 20), ginterval(30, 35), ginterval(50, 65)]
-thick = ginterval(15, 60)
-gi = ginterval(chrom=’chr2’, name=’GInterval2’, strand=’-‘, blocks=intervals, thick=thick, rgb=’read’)</p>
-<p>self.assertEqual(gi.thick_start_position, 59)
-self.assertEqual(gi.thick_end_position, 15)
-self.assertEqual(gi.thick_start_index, 5)
-self.assertEqual(gi.thick_end_index, 24)
-self.assertEqual(gi[‘red’], None)</p>
-<p>g1 = gi[10:31]
-self.assertEqual(len(g1), 11)</p>
-<p>g1 = ginterval(blocks=[ginterval(10, 20), ginterval(20, 22), ginterval(100, 200)])
-g2 = ginterval(25, 27, chrom=’chr2’, name=’GInterval2’, strand=’-‘, rgb=’read’)
-g3 = g1 + g2
-self.assertEqual(len(g3), 114)</p>
+<dl class="attribute">
+<dt>
+<code class="descname">y</code></dt>
+<dd><p><em>return</em> – The y position (0-base excluded) of the interval instance.</p>
 </dd></dl>
 
 </dd></dl>

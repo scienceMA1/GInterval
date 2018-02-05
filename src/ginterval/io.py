@@ -1,4 +1,4 @@
-from GInterval import GInterval
+from ginterval import GInterval
 import os
 
 
