@@ -1,0 +1,233 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ginterval.transcript &#8212; GInterval 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ginterval.transcript</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ginterval.io</span> <span class="k">import</span> <span class="n">ParserFactory</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="TranscriptAnalysis"><a class="viewcode-back" href="../../ginterval.html#ginterval.transcript.TranscriptAnalysis">[docs]</a><span class="k">class</span> <span class="nc">TranscriptAnalysis</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sfile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="o">=</span> <span class="n">raw_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="o">=</span> <span class="n">fmt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sfile</span> <span class="o">=</span> <span class="n">sfile</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;5UTR&#39;</span><span class="p">,</span> <span class="s1">&#39;CDS&#39;</span><span class="p">,</span> <span class="s1">&#39;3UTR&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_from_raw_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_from_summary_file</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__load_from_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lengths1</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lengths2</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lengths3</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">length1</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">length2</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">length3</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">index0</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">start_index</span>
+                <span class="n">index1</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">thick_start_index</span>
+                <span class="n">index2</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">thick_end_index</span>
+                <span class="n">index3</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">end_index</span>
+                <span class="n">length1</span> <span class="o">=</span> <span class="n">index1</span> <span class="o">-</span> <span class="n">index0</span>
+                <span class="n">length2</span> <span class="o">=</span> <span class="n">index2</span> <span class="o">-</span> <span class="n">index1</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">length3</span> <span class="o">=</span> <span class="n">index3</span> <span class="o">-</span> <span class="n">index2</span>
+
+            <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">lengths1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">length1</span><span class="p">)</span>
+            <span class="n">lengths2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">length2</span><span class="p">)</span>
+            <span class="n">lengths3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">length3</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">names</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">lengths1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="n">lengths2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">lengths3</span>
+        <span class="p">})</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__load_from_summary_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sfile</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">total_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">thick_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;CDS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">smooth_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;CDS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">average_5UTR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;5UTR&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">average_CDS</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;CDS&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">average_3UTR</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;3UTR&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">total_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">total_count</span>
+        <span class="n">thick_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick_count</span>
+        <span class="n">smooth_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smooth_count</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Total input record: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_count</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Record with thick interval: </span><span class="si">%d</span><span class="s1"> (</span><span class="si">%.2f%%</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">thick_count</span><span class="p">,</span> <span class="n">thick_count</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">total_count</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Record without thick interval: </span><span class="si">%d</span><span class="s1"> (</span><span class="si">%.2f%%</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="n">smooth_count</span><span class="p">,</span> <span class="n">smooth_count</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">/</span> <span class="n">total_count</span><span class="p">))</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Average 5UTR length: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_5UTR</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Average CDS length: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_CDS</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Average 3UTR length: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">average_3UTR</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TranscriptAnalysis.plot"><a class="viewcode-back" href="../../ginterval.html#ginterval.transcript.TranscriptAnalysis.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">[</span><span class="s1">&#39;CDS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">notnull</span><span class="p">()]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;The length distribution of transcript components&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">boxplot</span><span class="p">([</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;5UTR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;CDS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;3UTR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">],</span> <span class="n">showfliers</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Transcript Components&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Length Distribution (nt)&#39;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TranscriptAnalysis.save"><a class="viewcode-back" href="../../ginterval.html#ginterval.transcript.TranscriptAnalysis.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s1">&#39;NA&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TranscriptAnalysis.get_summary"><a class="viewcode-back" href="../../ginterval.html#ginterval.transcript.TranscriptAnalysis.get_summary">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_summary</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">infile</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">summary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">summary</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">TranscriptAnalysis</span><span class="p">(</span><span class="n">sfile</span><span class="o">=</span><span class="n">summary</span><span class="p">)</span>
+        <span class="n">ta</span> <span class="o">=</span> <span class="n">TranscriptAnalysis</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">summary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ta</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ta</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">ta</span> <span class="o">=</span> <span class="n">TranscriptAnalysis</span><span class="p">(</span><span class="s2">&quot;../data/hg19_knownGene.bed&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">ta</span><span class="p">)</span>
+    <span class="n">ta</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+    <span class="k">pass</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">GInterval</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  <li><a href="../ginterval.html">ginterval</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Zonggui Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

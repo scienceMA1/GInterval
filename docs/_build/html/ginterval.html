@@ -1,0 +1,467 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ginterval package &#8212; GInterval 1.0.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="ginterval-package">
+<h1>ginterval package<a class="headerlink" href="#ginterval-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ginterval.io">
+<span id="ginterval-io-module"></span><h2>ginterval.io module<a class="headerlink" href="#module-ginterval.io" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ginterval.io.BEDParser">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">BEDParser</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#BEDParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.BEDParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ginterval.io.Parser" title="ginterval.io.Parser"><code class="xref py py-class docutils literal"><span class="pre">ginterval.io.Parser</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.io.GTFParser">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">GTFParser</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#GTFParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.GTFParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ginterval.io.Parser" title="ginterval.io.Parser"><code class="xref py py-class docutils literal"><span class="pre">ginterval.io.Parser</span></code></a></p>
+<dl class="classmethod">
+<dt id="ginterval.io.GTFParser.process">
+<em class="property">classmethod </em><code class="descname">process</code><span class="sig-paren">(</span><em>records</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#GTFParser.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.GTFParser.process" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.io.Parser">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">Parser</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#Parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.Parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.io.ParserFactory">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">ParserFactory</code><span class="sig-paren">(</span><em>path</em>, <em>fmt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#ParserFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.ParserFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="ginterval.io.ParserFactory.format_map">
+<code class="descname">format_map</code><em class="property"> = {'.BED': 'BED', '.FQ': 'FASTQ', '.FASTQ': 'FASTQ', '.FA': 'FASTA', '.FASTA': 'FASTA', '.GTF': 'GTF'}</em><a class="headerlink" href="#ginterval.io.ParserFactory.format_map" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ginterval.io.ParserFactory.infer_format_by_context">
+<em class="property">classmethod </em><code class="descname">infer_format_by_context</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#ParserFactory.infer_format_by_context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.ParserFactory.infer_format_by_context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ginterval.io.ParserFactory.infer_format_by_suffix">
+<em class="property">classmethod </em><code class="descname">infer_format_by_suffix</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#ParserFactory.infer_format_by_suffix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.ParserFactory.infer_format_by_suffix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.io.ParserFactory.parser">
+<code class="descname">parser</code><a class="headerlink" href="#ginterval.io.ParserFactory.parser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.io.ShiftLoader">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">ShiftLoader</code><span class="sig-paren">(</span><em>path</em>, <em>fmt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#ShiftLoader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.ShiftLoader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The reference and shift bed files must bed sorted by bedtools sort.</p>
+<p>Or use command: sort -k1,1 -k2,2n</p>
+<p>The sorted results of igvtools is not supported.</p>
+<dl class="method">
+<dt id="ginterval.io.ShiftLoader.get_shifts">
+<code class="descname">get_shifts</code><span class="sig-paren">(</span><em>reference</em>, <em>extend=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#ShiftLoader.get_shifts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.ShiftLoader.get_shifts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.io.Writer">
+<em class="property">class </em><code class="descclassname">ginterval.io.</code><code class="descname">Writer</code><a class="reference internal" href="_modules/ginterval/io.html#Writer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.Writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ginterval.io.write">
+<code class="descclassname">ginterval.io.</code><code class="descname">write</code><span class="sig-paren">(</span><em>f</em>, <em>obj</em>, <em>fmt=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/io.html#write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.io.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ginterval.transcript">
+<span id="ginterval-transcript-module"></span><h2>ginterval.transcript module<a class="headerlink" href="#module-ginterval.transcript" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ginterval.transcript.TranscriptAnalysis">
+<em class="property">class </em><code class="descclassname">ginterval.transcript.</code><code class="descname">TranscriptAnalysis</code><span class="sig-paren">(</span><em>raw_data=None</em>, <em>fmt=None</em>, <em>sfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/transcript.html#TranscriptAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.average_3UTR">
+<code class="descname">average_3UTR</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.average_3UTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.average_5UTR">
+<code class="descname">average_5UTR</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.average_5UTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.average_CDS">
+<code class="descname">average_CDS</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.average_CDS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ginterval.transcript.TranscriptAnalysis.get_summary">
+<em class="property">classmethod </em><code class="descname">get_summary</code><span class="sig-paren">(</span><em>infile</em>, <em>fmt=None</em>, <em>summary=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/transcript.html#TranscriptAnalysis.get_summary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.get_summary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.transcript.TranscriptAnalysis.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>output=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/transcript.html#TranscriptAnalysis.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.transcript.TranscriptAnalysis.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval/transcript.html#TranscriptAnalysis.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.smooth_count">
+<code class="descname">smooth_count</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.smooth_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.thick_count">
+<code class="descname">thick_count</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.thick_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.transcript.TranscriptAnalysis.total_count">
+<code class="descname">total_count</code><a class="headerlink" href="#ginterval.transcript.TranscriptAnalysis.total_count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ginterval.utils">
+<span id="ginterval-utils-module"></span><h2>ginterval.utils module<a class="headerlink" href="#module-ginterval.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ginterval.utils.SequenceExtractor">
+<em class="property">class </em><code class="descclassname">ginterval.utils.</code><code class="descname">SequenceExtractor</code><a class="reference internal" href="_modules/ginterval/utils.html#SequenceExtractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.utils.SequenceExtractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ginterval">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-ginterval" title="Permalink to this headline">¶</a></h2>
+<p>GInterval module.</p>
+<p>This module support the</p>
+<p class="rubric">Example</p>
+<p>g = GInterval(10, 20, chrom=”chr1”, name=”peak_01”, strand=”+”)</p>
+<dl class="class">
+<dt id="ginterval.GInterval">
+<em class="property">class </em><code class="descclassname">ginterval.</code><code class="descname">GInterval</code><span class="sig-paren">(</span><em>x=None</em>, <em>y=None</em>, <em>blocks=None</em>, <em>thick=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The summary line for a class docstring should fit on one line.</p>
+<p>If the class has public attributes, they may be documented here
+in an <code class="docutils literal"><span class="pre">Attributes</span></code> section and follow the same formatting as a
+function’s <code class="docutils literal"><span class="pre">Args</span></code> section. Alternatively, attributes may be documented
+inline with the attribute’s declaration (see __init__ method below).</p>
+<p>Properties created with the <code class="docutils literal"><span class="pre">&#64;property</span></code> decorator should be documented
+in the property’s getter method.</p>
+<dl class="attribute">
+<dt id="ginterval.GInterval.attr1">
+<code class="descname">attr1</code><a class="headerlink" href="#ginterval.GInterval.attr1" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> – Description of <cite>attr1</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.attr2">
+<code class="descname">attr2</code><a class="headerlink" href="#ginterval.GInterval.attr2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="xref py py-obj docutils literal"><span class="pre">int</span></code>, optional – Description of <cite>attr2</cite>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.blocks">
+<code class="descname">blocks</code><a class="headerlink" href="#ginterval.GInterval.blocks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.center_index">
+<code class="descname">center_index</code><a class="headerlink" href="#ginterval.GInterval.center_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.center_position">
+<code class="descname">center_position</code><a class="headerlink" href="#ginterval.GInterval.center_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.chrom">
+<code class="descname">chrom</code><a class="headerlink" href="#ginterval.GInterval.chrom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.coincide">
+<code class="descname">coincide</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.coincide"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.coincide" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="ginterval.GInterval.combine_adjacent">
+<em class="property">classmethod </em><code class="descname">combine_adjacent</code><span class="sig-paren">(</span><em>intervals</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.combine_adjacent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.combine_adjacent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.contain">
+<code class="descname">contain</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.contain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.contain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.end_index">
+<code class="descname">end_index</code><a class="headerlink" href="#ginterval.GInterval.end_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.end_position">
+<code class="descname">end_position</code><a class="headerlink" href="#ginterval.GInterval.end_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.forward">
+<code class="descname">forward</code><a class="headerlink" href="#ginterval.GInterval.forward" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.gaps">
+<code class="descname">gaps</code><a class="headerlink" href="#ginterval.GInterval.gaps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.has_thick">
+<code class="descname">has_thick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.has_thick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.has_thick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.name">
+<code class="descname">name</code><a class="headerlink" href="#ginterval.GInterval.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.overlap">
+<code class="descname">overlap</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.overlap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.overlap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.position">
+<code class="descname">position</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.reverse">
+<code class="descname">reverse</code><a class="headerlink" href="#ginterval.GInterval.reverse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.set_strand_sensitivity">
+<code class="descname">set_strand_sensitivity</code><span class="sig-paren">(</span><em>sensitivity=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.set_strand_sensitivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.set_strand_sensitivity" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.start_index">
+<code class="descname">start_index</code><a class="headerlink" href="#ginterval.GInterval.start_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.start_position">
+<code class="descname">start_position</code><a class="headerlink" href="#ginterval.GInterval.start_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.strand">
+<code class="descname">strand</code><a class="headerlink" href="#ginterval.GInterval.strand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.thick_end_index">
+<code class="descname">thick_end_index</code><a class="headerlink" href="#ginterval.GInterval.thick_end_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.thick_end_position">
+<code class="descname">thick_end_position</code><a class="headerlink" href="#ginterval.GInterval.thick_end_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.thick_start_index">
+<code class="descname">thick_start_index</code><a class="headerlink" href="#ginterval.GInterval.thick_start_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.thick_start_position">
+<code class="descname">thick_start_position</code><a class="headerlink" href="#ginterval.GInterval.thick_start_position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ginterval.GInterval.to_bed_format_string">
+<code class="descname">to_bed_format_string</code><span class="sig-paren">(</span><em>ncol=12</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#GInterval.to_bed_format_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.GInterval.to_bed_format_string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.x">
+<code class="descname">x</code><a class="headerlink" href="#ginterval.GInterval.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ginterval.GInterval.y">
+<code class="descname">y</code><a class="headerlink" href="#ginterval.GInterval.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ginterval.IntervalTest">
+<em class="property">class </em><code class="descclassname">ginterval.</code><code class="descname">IntervalTest</code><span class="sig-paren">(</span><em>methodName='runTest'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#IntervalTest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.IntervalTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">unittest.case.TestCase</span></code></p>
+<dl class="method">
+<dt id="ginterval.IntervalTest.test_GInterval">
+<code class="descname">test_GInterval</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ginterval.html#IntervalTest.test_GInterval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ginterval.IntervalTest.test_GInterval" title="Permalink to this definition">¶</a></dt>
+<dd><p>i = ginterval(10, 20)
+self.assertEqual(len(i), 10)
+self.assertEqual(i.x, 10)
+self.assertEqual(i.y, 20)</p>
+<p>gi = ginterval(10, 50, chrom=’chr1’, name=’GInterval1’, strand=’-‘)</p>
+<p>self.assertEqual(len(gi), 40)</p>
+<p>gi.set_strand_sensitivity(False)
+self.assertEqual(gi.start_position, 10)
+self.assertEqual(gi.end_position, 49)
+self.assertEqual(gi.start_index, 0)
+self.assertEqual(gi.end_index, 39)</p>
+<p>gi.set_strand_sensitivity(True)
+self.assertEqual(gi.start_position, 49)
+self.assertEqual(gi.end_position, 10)
+self.assertEqual(gi.start_index, 0)
+self.assertEqual(gi.end_index, 39)</p>
+<p>intervals = [ginterval(10, 20), ginterval(30, 35), ginterval(50, 65)]
+gi = ginterval(chrom=’chr2’, name=’GInterval2’, strand=’-‘, blocks=intervals)</p>
+<p>self.assertEqual(gi.start_index, 0)
+self.assertEqual(gi.end_index, 29)
+self.assertEqual(len(gi), 30)</p>
+<p>self.assertEqual(gi.index(10), 29)
+gi.set_strand_sensitivity(False)
+self.assertEqual(gi.index(15), 5)
+gi.set_strand_sensitivity(True)
+self.assertEqual(gi.index(15), 24)</p>
+<p>self.assertEqual(gi.position(29), 10)</p>
+<p>intervals = [ginterval(10, 20), ginterval(30, 35), ginterval(50, 65)]
+thick = ginterval(15, 60)
+gi = ginterval(chrom=’chr2’, name=’GInterval2’, strand=’-‘, blocks=intervals, thick=thick, rgb=’read’)</p>
+<p>self.assertEqual(gi.thick_start_position, 59)
+self.assertEqual(gi.thick_end_position, 15)
+self.assertEqual(gi.thick_start_index, 5)
+self.assertEqual(gi.thick_end_index, 24)
+self.assertEqual(gi[‘red’], None)</p>
+<p>g1 = gi[10:31]
+self.assertEqual(len(g1), 11)</p>
+<p>g1 = ginterval(blocks=[ginterval(10, 20), ginterval(20, 22), ginterval(100, 200)])
+g2 = ginterval(25, 27, chrom=’chr2’, name=’GInterval2’, strand=’-‘, rgb=’read’)
+g3 = g1 + g2
+self.assertEqual(len(g3), 114)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">GInterval</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Zonggui Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/ginterval.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

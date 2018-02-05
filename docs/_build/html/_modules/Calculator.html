@@ -1,0 +1,401 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Calculator &#8212; GInterval 1.0.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for Calculator</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ginterval.io</span> <span class="k">import</span> <span class="n">ShiftLoader</span><span class="p">,</span> <span class="n">ParserFactory</span>
+<span class="kn">from</span> <span class="nn">ginterval</span> <span class="k">import</span> <span class="n">GInterval</span>
+
+<div class="viewcode-block" id="cal_shift_around_anchor"><a class="viewcode-back" href="../Calculator.html#Calculator.cal_shift_around_anchor">[docs]</a><span class="k">def</span> <span class="nf">cal_shift_around_anchor</span><span class="p">():</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="duxian"><a class="viewcode-back" href="../Calculator.html#Calculator.duxian">[docs]</a><span class="k">def</span> <span class="nf">duxian</span><span class="p">(</span><span class="n">read1</span><span class="p">,</span> <span class="n">read2</span><span class="p">,</span> <span class="n">transcript</span><span class="p">):</span>
+    <span class="n">trans1</span> <span class="o">=</span> <span class="n">ShiftLoader</span><span class="p">(</span><span class="n">transcript</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;BED&quot;</span><span class="p">)</span>
+    <span class="n">trans2</span> <span class="o">=</span> <span class="n">ShiftLoader</span><span class="p">(</span><span class="n">transcript</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;BED&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">r1</span><span class="p">,</span> <span class="n">r2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ParserFactory</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">read1</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;BED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span><span class="p">,</span>
+                      <span class="n">ParserFactory</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">read2</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;BED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span><span class="p">):</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">trans1</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">r1</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="n">trans2</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">r2</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="n">r1</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">s1</span><span class="p">))</span>
+        <span class="n">s2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">strand</span> <span class="o">!=</span> <span class="n">r2</span><span class="o">.</span><span class="n">strand</span><span class="p">,</span> <span class="n">s2</span><span class="p">))</span>
+
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">s1</span><span class="p">]</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">r2</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">r2</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">ts</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;============================================&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">r1</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">r2</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+            <span class="n">nt</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="n">x</span><span class="p">:</span><span class="n">y</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">nt</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="cal_shift_inside_reference"><a class="viewcode-back" href="../Calculator.html#Calculator.cal_shift_inside_reference">[docs]</a><span class="k">def</span> <span class="nf">cal_shift_inside_reference</span><span class="p">(</span><span class="n">spath</span><span class="p">,</span> <span class="n">rpath</span><span class="p">,</span> <span class="n">opath</span><span class="p">,</span> <span class="n">sfmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rfmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">strand_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">opath</span><span class="p">,</span> <span class="s2">&quot;w+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fw</span><span class="p">:</span>
+        <span class="n">sl</span> <span class="o">=</span> <span class="n">ShiftLoader</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">spath</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">sfmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ri</span> <span class="ow">in</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">rpath</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">rfmt</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ri</span><span class="o">.</span><span class="n">thick</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">index0</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">start_index</span>
+            <span class="n">index1</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">thick_start_index</span>
+            <span class="n">index2</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">thick_end_index</span>
+            <span class="n">index3</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">end_index</span>
+
+            <span class="n">flen</span> <span class="o">=</span> <span class="n">index1</span>
+            <span class="n">clen</span> <span class="o">=</span> <span class="n">index2</span> <span class="o">-</span> <span class="n">index1</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">tlen</span> <span class="o">=</span> <span class="n">index3</span> <span class="o">-</span> <span class="n">index2</span>
+
+            <span class="n">sfts</span> <span class="o">=</span> <span class="n">sl</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">ri</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="n">extend</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sfts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">sfts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">strand_sensitive</span><span class="p">:</span>
+                    <span class="n">shift</span><span class="o">.</span><span class="n">strand</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">strand</span>
+                <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">strand</span> <span class="o">!=</span> <span class="n">ri</span><span class="o">.</span><span class="n">strand</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">ri</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">shift</span><span class="o">.</span><span class="n">center_position</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># 1. Calculate the relative distance.</span>
+                <span class="k">if</span> <span class="n">index0</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="n">index1</span><span class="p">:</span>
+                    <span class="n">relative</span> <span class="o">=</span> <span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="n">index0</span><span class="p">)</span> <span class="o">/</span> <span class="n">flen</span>
+                <span class="k">elif</span> <span class="n">index1</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">index2</span><span class="p">:</span>
+                    <span class="n">relative</span> <span class="o">=</span> <span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="n">index1</span><span class="p">)</span> <span class="o">/</span> <span class="n">clen</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">relative</span> <span class="o">=</span> <span class="p">(</span><span class="n">index</span> <span class="o">-</span> <span class="n">index2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">tlen</span> <span class="o">+</span> <span class="mi">2</span>
+
+                <span class="c1"># 2. Calculate the absolute distance.</span>
+                <span class="n">dis0</span> <span class="o">=</span> <span class="n">index</span> <span class="o">-</span> <span class="n">index0</span>
+                <span class="n">dis1</span> <span class="o">=</span> <span class="n">index</span> <span class="o">-</span> <span class="n">index1</span>
+                <span class="n">dis2</span> <span class="o">=</span> <span class="n">index</span> <span class="o">-</span> <span class="n">index2</span>
+                <span class="n">dis3</span> <span class="o">=</span> <span class="n">index</span> <span class="o">-</span> <span class="n">index3</span>
+
+                <span class="c1"># 3. Save the result.</span>
+                <span class="n">fw</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+                    <span class="n">ri</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span>
+                    <span class="n">shift</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span>
+                    <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="p">[</span><span class="n">relative</span><span class="p">,</span> <span class="n">dis0</span><span class="p">,</span> <span class="n">dis1</span><span class="p">,</span> <span class="n">dis2</span><span class="p">,</span> <span class="n">dis3</span><span class="p">]))</span>
+                <span class="p">])</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="n">number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">number</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class1.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class1_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class2.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class2_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class3.sorted.bed&#39;, </span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class3_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)&#39;&#39;&#39;</span>
+
+    <span class="sd">&#39;&#39;&#39;cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/P-Body-Enrichment_Class1.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/P-Body-Enrichment_Class1_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/P-Body-Enrichment_Class2.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/P-Body-Enrichment_Class2_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/P-Body-Enrichment_Class3.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/P-Body-Enrichment_Class3_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)&#39;&#39;&#39;</span>
+
+    <span class="sd">&#39;&#39;&#39;cal_shift_inside_reference(spath=&#39;../data/GSM2300428_m6A_peak_region_HeLa_CY_hg19.sorted.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/hg19_knownGene.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/hg19_knownGene_m6A.bed&#39;,</span>
+<span class="sd">                               strand_sensitive=False)&#39;&#39;&#39;</span>
+
+
+    <span class="sd">&#39;&#39;&#39;cal_shift_inside_reference(spath=&#39;../data/random.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/hg19_knownGene.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/hg19_knownGene_random.bed&#39;)&#39;&#39;&#39;</span>
+
+    <span class="sd">&#39;&#39;&#39;cal_shift_inside_reference(spath=&#39;../data/random.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class1.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class1_random.bed&#39;)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/random.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class2.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class2_random.bed&#39;)</span>
+<span class="sd">    cal_shift_inside_reference(spath=&#39;../data/random.bed&#39;,</span>
+<span class="sd">                               rpath=&#39;../data/RFP_inputRNA_TE_Class3.sorted.bed&#39;,</span>
+<span class="sd">                               opath=&#39;../data/RFP_inputRNA_TE_Class3_random.bed&#39;)&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="Calculator"><a class="viewcode-back" href="../Calculator.html#Calculator.Calculator">[docs]</a><span class="k">class</span> <span class="nc">Calculator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+    <span class="sd">&#39;&#39;&#39;&#39;@classmethod</span>
+<span class="sd">    def cal_shift_around_anchor(cls, apath, spath, opath, width=30):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        Calculate the distance of shift intervals around anchor intervals.</span>
+
+<span class="sd">        :param apath: The path of file which contain anchor intervals</span>
+<span class="sd">        :param spath: The path of file which contain shift intervals.</span>
+<span class="sd">        :param opath: The path of output file which stores the results.</span>
+<span class="sd">        :param width: The valid distance for shift intervals to anchor intervals.</span>
+<span class="sd">        :return: The number of valid results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        assert apath is not None</span>
+<span class="sd">        assert spath is not None</span>
+<span class="sd">        assert opath is not None</span>
+
+<span class="sd">        number = 0</span>
+
+<span class="sd">        with open(opath, &quot;w+&quot;) as fw:</span>
+<span class="sd">            sl = ShiftLoader(spath)</span>
+<span class="sd">            for anchor in IntervalFactory.from_bed_file(apath):</span>
+<span class="sd">                sfts = sl.get_shifts(anchor, width)</span>
+<span class="sd">                if sfts is None:</span>
+<span class="sd">                    continue</span>
+<span class="sd">                for shift in sfts:</span>
+<span class="sd">                    if shift.forward != anchor.forward:</span>
+<span class="sd">                        continue</span>
+<span class="sd">                    dis = anchor.cal_distance(shift)</span>
+<span class="sd">                    if abs(dis) &gt; width:</span>
+<span class="sd">                        continue</span>
+<span class="sd">                    fw.write(&quot;\t&quot;.join([</span>
+<span class="sd">                        anchor.to_bed_format_string(6),</span>
+<span class="sd">                        shift.to_bed_format_string(6),</span>
+<span class="sd">                        str(dis)</span>
+<span class="sd">                    ]) + &quot;\n&quot;)</span>
+<span class="sd">                    number += 1</span>
+
+<span class="sd">        return number</span>
+
+<span class="sd">    @classmethod</span>
+<span class="sd">    def cal_shift_on_reference(cls, spath, rpath, opath):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        Calculate the distribution of shift intervals inside reference intervals.</span>
+
+<span class="sd">        :param spath: The path of file which contain shift intervals.</span>
+<span class="sd">        :param rpath: The path of file which contain reference intervals.</span>
+<span class="sd">        :param opath: The path of output file which stores the results.</span>
+<span class="sd">        :return: The number of valid results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        assert spath is not None</span>
+<span class="sd">        assert rpath is not None</span>
+<span class="sd">        assert opath is not None</span>
+
+<span class="sd">        number = 0</span>
+
+<span class="sd">        with open(opath, &quot;w+&quot;) as fw:</span>
+<span class="sd">            sl = ShiftLoader(spath)</span>
+<span class="sd">            for reference in IntervalFactory.from_bed_file(rpath):</span>
+<span class="sd">                if not reference.has_thick_interval:</span>
+<span class="sd">                    continue</span>
+
+<span class="sd">                five_length = reference.utr5_length</span>
+<span class="sd">                cds_length = reference.cds_length</span>
+<span class="sd">                three_length = reference.utr3_length</span>
+
+<span class="sd">                index0 = 0</span>
+<span class="sd">                index1 = reference.thick_start_index</span>
+<span class="sd">                index2 = reference.thick_end_index</span>
+<span class="sd">                index3 = reference.length - 1</span>
+
+<span class="sd">                sfts = sl.get_shifts(reference, 0)</span>
+<span class="sd">                if sfts is None:</span>
+<span class="sd">                    continue</span>
+
+<span class="sd">                for shift in sfts:</span>
+<span class="sd">                    if shift.forward != reference.forward:</span>
+<span class="sd">                        continue</span>
+
+<span class="sd">                    index = reference.get_index_by_position(shift.center_position)</span>
+<span class="sd">                    if index is None:</span>
+<span class="sd">                        continue</span>
+
+<span class="sd">                    # 1. Calculate the relative distance.</span>
+<span class="sd">                    if index0 &lt;= index &lt; index1:</span>
+<span class="sd">                        relative = (index - index0) / five_length</span>
+<span class="sd">                    elif index1 &lt;= index &lt;= index2:</span>
+<span class="sd">                        relative = (index - index1) / cds_length + 1</span>
+<span class="sd">                    else:</span>
+<span class="sd">                        relative = (index - index2 - 1) / three_length + 2</span>
+
+<span class="sd">                    # 2. Calculate the absolute distance.</span>
+<span class="sd">                    dis0 = index - index0</span>
+<span class="sd">                    dis1 = index - index1</span>
+<span class="sd">                    dis2 = index - index2</span>
+<span class="sd">                    dis3 = index - index3</span>
+
+<span class="sd">                    # 3. Save the result.</span>
+<span class="sd">                    fw.write(&quot;\t&quot;.join([</span>
+<span class="sd">                        reference.to_bed_format_string(6),</span>
+<span class="sd">                        shift.to_bed_format_string(6),</span>
+<span class="sd">                        &quot;\t&quot;.join(map(str, [relative, dis0, dis1, dis2, dis3]))</span>
+<span class="sd">                    ]) + &quot;\n&quot;)</span>
+
+<span class="sd">                    number += 1</span>
+
+<span class="sd">        return number</span>
+
+<span class="sd">    @classmethod</span>
+<span class="sd">    def cal_shift_around_anchor_on_reference(cls, apath, spath, rpath, opath, width=30):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+<span class="sd">        Calculate the relative distances of shift intervals around anchor intervals on reference.</span>
+
+<span class="sd">        :param apath: The path of file which contain the anchor intervals.</span>
+<span class="sd">        :param spath: The path of file which contain the shift intervals.</span>
+<span class="sd">        :param rpath: The path of file which contain the reference intervals.</span>
+<span class="sd">        :param width: The valid distance for shift intervals to anchor intervals.</span>
+<span class="sd">        :param opath: The path of output file which stores the results (distances).</span>
+<span class="sd">        :return: The number of valid results.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        assert apath is not None</span>
+<span class="sd">        assert spath is not None</span>
+<span class="sd">        assert rpath is not None</span>
+<span class="sd">        assert opath is not None</span>
+
+<span class="sd">        number = 0</span>
+
+<span class="sd">        with open(opath, &quot;w+&quot;) as fw:</span>
+<span class="sd">            shift_loader = ShiftLoader(spath)</span>
+<span class="sd">            anchor_loader = ShiftLoader(apath)</span>
+<span class="sd">            for reference in IntervalFactory.from_bed_file(rpath):</span>
+<span class="sd">                if not reference.has_thick_interval:</span>
+<span class="sd">                    continue</span>
+
+<span class="sd">                shifts = shift_loader.get_shifts(reference, 0)</span>
+<span class="sd">                anchors = anchor_loader.get_shifts(reference, 0)</span>
+<span class="sd">                if shifts is None or anchors is None:</span>
+<span class="sd">                    continue</span>
+
+<span class="sd">                for shift in shifts:</span>
+<span class="sd">                    if shift.forward != reference.forward:</span>
+<span class="sd">                        continue</span>
+<span class="sd">                    sindex = reference.get_index_by_position(shift.center_position)</span>
+<span class="sd">                    if sindex is None:</span>
+<span class="sd">                        continue</span>
+<span class="sd">                    for anchor in anchors:</span>
+<span class="sd">                        if anchor.forward != reference.forward:</span>
+<span class="sd">                            continue</span>
+<span class="sd">                        aindex = reference.get_index_by_position(anchor.center_position)</span>
+<span class="sd">                        if aindex is None:</span>
+<span class="sd">                            continue</span>
+<span class="sd">                        distance = anchor.cal_distance(shift)</span>
+<span class="sd">                        if abs(distance) &gt; width:</span>
+<span class="sd">                            continue</span>
+<span class="sd">                        fw.write(&quot;\t&quot;.join([</span>
+<span class="sd">                            anchor.to_bed_format_string(6),</span>
+<span class="sd">                            shift.to_bed_format_string(6),</span>
+<span class="sd">                            str(distance)</span>
+<span class="sd">                        ]) + &quot;\n&quot;)</span>
+<span class="sd">                        number += 1</span>
+
+<span class="sd">        return number&#39;&#39;&#39;</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">GInterval</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Zonggui Chen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
