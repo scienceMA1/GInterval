@@ -270,28 +270,29 @@ class GInterval(object):
         :param other:
         :return:
         """
-        blocks1 = self.combine_adjacent(self.blocks)
-        blocks2 = self.combine_adjacent(other.blocks)
-
-        i1 = 0
-        mi1 = len(blocks1)
-        for b2 in blocks2:
+        blocks1 = list(GInterval.combine_adjacent(self.blocks))
+        i = 0
+        i_max = len(blocks1)
+        for x, y in other.blocks:
+            find = False
             while True:
-                if i1 >= mi1:
-                    return False
-                b1 = blocks1[i1]
-                if b2.x >= b1.y:
-                    i1 += 1
-                    continue
-                elif b2.x >= b1.x and b2.y <= b1.y:
+                x1, y1 = blocks1[i]
+                if x1 <= x and y1 >= y:
+                    find = True
                     break
-                else:
-                    return False
+                i += 1
+                if i == i_max:
+                    break
+            if not find:
+                return False
+
         return True
 
-    def coincide(self, other):
+    def coincide(self, other, adjacent1=False, adjacent2=True):
         """
         The other block interval is a continuous subset of self.
+        :param adjacent1:
+        :param adjacent2:
         :param other:
         :return:
         """
@@ -300,59 +301,49 @@ class GInterval(object):
 
         blocks1 = self.blocks
         blocks2 = other.blocks
+        if not adjacent1:
+            blocks1 = GInterval.combine_adjacent(blocks1)
+        if not adjacent2:
+            blocks2 = GInterval.combine_adjacent(blocks2)
 
-        x2, y2 = next(blocks2)
-        meet = False
-        left = False
-        allow_next = True
-        for x1, y1 in blocks1:
-            if max(x1, x2) < min(y1, y2):
-                meet = True
-                if x1 <= x2 and y1 >= y2:
-                    allow_next = (y1 == y2)
-
-
-
-        #blocks1 = list(self.blocks)
-        #blocks2 = list(other.blocks)
-        #if len(blocks2) == 1:
-        #    return self.contain(other)
-
-        gaps1 = list(self.gaps)
-        gaps2 = list(other.gaps)
-        len1 = len(gaps1)
-        len2 = len(gaps2)
-        if len2 == 0:
-            if len1 == 0:
-                return True
-            else:
-                return self.contain(other)
-
-        if len1 < len2:
+        x1, y1 = next(blocks1)
+        head_allowed = True
+        tail_allowed = True
+        try:
+            for x2, y2 in blocks2:
+                while True:
+                    if x2 >= y1:
+                        x1, y1 = next(blocks1)
+                        continue
+                    elif x1 >= y2:
+                        return False
+                    else:
+                        if x1 < x2 and y1 == y2:
+                            if head_allowed:
+                                head_allowed = False
+                                break
+                            else:
+                                return False
+                        elif x1 == x2 and y1 > y2:
+                            if tail_allowed:
+                                head_allowed = False
+                                break
+                            else:
+                                return False
+                        elif x1 < x2 and y1 > y2:
+                            if head_allowed and tail_allowed:
+                                head_allowed = False
+                                tail_allowed = False
+                                break
+                            else:
+                                return False
+                        elif x1 == x2 and y1 == y2:
+                            continue
+                        else:
+                            return False
+        except StopIteration as err:
             return False
 
-        if not self.contain(other):
-            return False
-
-        start = None
-        g2 = gaps2[0]
-        for i, block in enumerate(gaps1):
-            x, y = block
-            if g1.x == g2.x and g1.y == g2.y:
-                start = i
-                break
-        if start is None:
-            return False
-
-        residual = len(gaps2) - 1
-        if len(gaps1) - start - 1 < residual:
-            return False
-
-        for i in range(residual):
-            g1 = gaps1[start + 1 + i]
-            g2 = gaps2[i + 1]
-            if not (g1.x == g2.x and g1.y == g2.y):
-                return False
         return True
 
     def index(self, position):
@@ -366,7 +357,7 @@ class GInterval(object):
         index = 0
         for x, y in self.blocks:
             if y <= position:
-                index += (y-x)
+                index += (y - x)
                 continue
             elif x <= position < y:
                 index += position - x
@@ -393,7 +384,7 @@ class GInterval(object):
         if self.reverse:
             index = end_index - index
         for x, y in self.blocks:
-            index -= (y-x)
+            index -= (y - x)
             if index < 0:
                 return y + index
         raise Exception('Unknown Exception!')
@@ -402,6 +393,10 @@ class GInterval(object):
 
     @property
     def start_position(self):
+        """
+
+        :return: The strand-specific start genomic position (0-base, included).
+        """
         if self.forward:
             return self._x
         else:
@@ -409,6 +404,10 @@ class GInterval(object):
 
     @property
     def end_position(self):
+        """
+
+        :return: The strand-specific end genomic position (0-base, included).
+        """
         if self.forward:
             return self._y - 1
         else:
@@ -416,24 +415,44 @@ class GInterval(object):
 
     @property
     def start_index(self):
+        """
+
+        :return: The strand-specific index of start genomic position (0-base).
+        """
         return 0
 
     @property
     def end_index(self):
+        """
+
+        :return: The strand-specific index of end genomic position (0-base).
+        """
         return len(self) - 1
 
     @property
     def center_index(self):
+        """
+
+        :return: The index of the strand-specific center genomic position. Blocks and Gaps are considered.
+        """
         return len(self) // 2
 
     @property
     def center_position(self):
+        """
+
+        :return: The center genomic position of this GInterval instance. Blocks and Gaps are considered.
+        """
         return self.position(self.center_index)
 
     # Thick operation.
 
     @property
     def thick_start_position(self):
+        """
+
+        :return: The genomic start position of thick interval. (0-base, included)
+        """
         x, y = self._thick
         if self.forward:
             return x
@@ -442,6 +461,10 @@ class GInterval(object):
 
     @property
     def thick_end_position(self):
+        """
+
+        :return: The genomic end position of thick interval. (0-base, included)
+        """
         x, y = self._thick
         if self.forward:
             return y - 1
@@ -450,13 +473,25 @@ class GInterval(object):
 
     @property
     def thick_start_index(self):
+        """
+
+        :return: The index of the genomic start position of thick relative to GInterval instance. (0-base)
+        """
         return self.index(self.thick_start_position)
 
     @property
     def thick_end_index(self):
+        """
+
+        :return: The index of the genomic end position of thick relative to GInterval instance. (0-base)
+        """
         return self.index(self.thick_end_position)
 
     def has_thick(self):
+        """
+
+        :return: True when there is a thick interval in this GInterval instance.
+        """
         return self._thick is not None
 
     # Output format
@@ -489,27 +524,72 @@ class GInterval(object):
             cols.extend([tx, ty, rgb, bnum, sizes, starts])
         return "\t".join(map(str, cols))
 
-    @classmethod
-    def combine_adjacent(cls, intervals):
-        intervals = sorted(intervals, key=lambda z: z.x)
-        results = []
-        last_interval = None
-        for interval in intervals:
-            if last_interval is None:
-                last_interval = interval
+    @staticmethod
+    def sorted_blocks(blocks):
+        """
+        Input a iterator of blocks and return the sorted iterator.
+        Sorted by x position.
+        :param blocks:
+        :return:
+        """
+        return sorted(blocks, key=itemgetter(0))
+
+    @staticmethod
+    def combine_blocks(blocks1, blocks2, adjacent=True):
+        """
+
+        :param adjacent: If the adjacent blocks is allowed.
+        :param blocks1:
+        :param blocks2:
+        :return:
+        """
+        blocks1 = list(blocks1)
+        blocks2 = list(blocks2)
+        blocks = blocks1 + blocks2
+        blocks = GInterval.sorted_blocks(blocks)
+        x0 = None
+        y0 = None
+        for x, y in blocks:
+            if x0 is None:
+                x0, y0 = x, y
             else:
-                if interval.x <= last_interval.y:
-                    last_interval = GInterval(last_interval.x, max(last_interval.y, interval.y))
+                if x <= y0:
+                    if adjacent and x == y0:
+                        yield (x0, y0)
+                        x0, y0 = x, y
+                    else:
+                        y0 = max(y0, y)
                 else:
-                    results.append(last_interval)
-                    last_interval = interval
-        if last_interval is not None:
-            results.append(last_interval)
-        return results
+                    yield (x0, y0)
+                    x0, y0 = x, y
+        if x0 is not None:
+            yield (x0, y0)
+
+    @staticmethod
+    def combine_adjacent(blocks):
+        """
+        Combine the adjacent blocks to one block.
+        :param blocks: the list of sorted blocks.
+        :return: 
+        """
+        x0 = None
+        y0 = None
+        for x, y in blocks:
+            if x0 is None:
+                x0, y0 = x, y
+            else:
+                if x == y0:
+                    y0 = y
+                else:
+                    yield (x0, y0)
+                    x0, y0 = x, y
+        if x0 is not None:
+            yield (x0, y0)
 
 
 if __name__ == '__main__':
-    gi1 = GInterval(blocks=[[10, 20], [30, 40], [50, 60]], thick=(25, 55))
-    gi2 = GInterval(blocks=[[10, 20], [30, 40], [45, 65]], thick=(25, 55))
+    pass
+    # gi1 = GInterval(blocks=[[10, 20], [30, 40], [50, 60]], thick=(25, 55))
+    # gi2 = GInterval(blocks=[[10, 20], [30, 40], [45, 65]], thick=(25, 55))
     # gi3 = gi1 + gi2
     # print(len(gi3))

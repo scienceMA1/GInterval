@@ -63,3 +63,7 @@ def test_ginterval():
     g1 = GInterval(blocks=[(10, 20), (30, 50), (90, 100)])
     g2 = GInterval(blocks=[(40, 52), (90, 95)])
     assert not g1.coincide(g2)
+
+    g1 = GInterval(blocks=[(10, 20), (20, 50), (90, 100)])
+    g2 = GInterval(blocks=[(15, 30), (30, 50)])
+    assert g1.coincide(g2, adjacent1=False, adjacent2=False)
