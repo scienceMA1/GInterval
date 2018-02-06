@@ -1,6 +1,13 @@
 ginterval package
 =================
 
+Subpackages
+-----------
+
+.. toctree::
+
+    ginterval.parser
+
 Submodules
 ----------
 

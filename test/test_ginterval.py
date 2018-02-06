@@ -1,5 +1,5 @@
 from ginterval import GInterval
-
+from ginterval.utils import SequenceExtractor
 
 def test_ginterval():
     i = GInterval(10, 20)
@@ -67,3 +67,19 @@ def test_ginterval():
     g1 = GInterval(blocks=[(10, 20), (20, 50), (90, 100)])
     g2 = GInterval(blocks=[(15, 30), (30, 50)])
     assert g1.coincide(g2, adjacent1=False, adjacent2=False)
+
+
+def test_sequence_extractor():
+    se = SequenceExtractor("test/data/test.fa")
+
+    g1 = GInterval(10, 20, chrom="chr2")
+    assert se.get_sequence(g1) == "gcgtagtcgC"
+
+    g2 = GInterval(10, 20, chrom="chr2", strand="-")
+    assert se.get_sequence(g2) == "Gcgactacgc"
+
+def test_shift_loader():
+    pass
+
+
+

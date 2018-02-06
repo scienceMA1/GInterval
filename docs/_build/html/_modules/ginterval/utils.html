@@ -40,10 +40,165 @@
           <div class="body" role="main">
             
   <h1>Source code for ginterval.utils</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="kn">from</span> <span class="nn">Bio.Seq</span> <span class="k">import</span> <span class="n">Seq</span>
+<span class="kn">from</span> <span class="nn">pysam</span> <span class="k">import</span> <span class="n">FastaFile</span>
+
 
 <div class="viewcode-block" id="SequenceExtractor"><a class="viewcode-back" href="../../ginterval.html#ginterval.utils.SequenceExtractor">[docs]</a><span class="k">class</span> <span class="nc">SequenceExtractor</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">pass</span></div>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Extracting sequences from FASTA file by interval objects.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fasta</span> <span class="o">=</span> <span class="n">FastaFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SequenceExtractor.get_sequence"><a class="viewcode-back" href="../../ginterval.html#ginterval.utils.SequenceExtractor.get_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">get_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gi</span><span class="p">):</span>
+        <span class="n">seqs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">gi</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">seqs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fasta</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="n">gi</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="n">Seq</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">seqs</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">gi</span><span class="o">.</span><span class="n">reverse</span><span class="p">:</span>
+            <span class="n">seq</span> <span class="o">=</span> <span class="n">seq</span><span class="o">.</span><span class="n">reverse_complement</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">seq</span></div>
+
+<div class="viewcode-block" id="SequenceExtractor.close"><a class="viewcode-back" href="../../ginterval.html#ginterval.utils.SequenceExtractor.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fasta</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fasta</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ShiftLoader"><a class="viewcode-back" href="../../ginterval.html#ginterval.utils.ShiftLoader">[docs]</a><span class="k">class</span> <span class="nc">ShiftLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    The reference and shift bed files must bed sorted by bedtools sort.</span>
+
+<span class="sd">    Or use command: sort -k1,1 -k2,2n</span>
+
+<span class="sd">    The sorted results of igvtools is not supported.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShiftLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__generator</span> <span class="o">=</span> <span class="n">IntervalFactory</span><span class="o">.</span><span class="n">from_bed_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="c1"># The list store the loaded intervals. The list should not to be accessed directly.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__eoc</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># The end of current chromosome.</span>
+
+        <span class="c1"># It store the result of next(generator). It will be None if reach the end of the file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># At the beginning, we need to load the first interval.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__load_one</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span>
+
+    <span class="k">def</span> <span class="nf">__load_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Load one interval by the generator, and store it in the last loaded record.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__generator</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">chrom_start</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom_start</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The shift intervals must be sorted!&quot;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">interval</span><span class="o">.</span><span class="n">chrom</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The shift intervals must be sorted!&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="o">=</span> <span class="n">interval</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span>
+
+    <span class="k">def</span> <span class="nf">__buffer_expand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eoc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_one</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__eoc</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="p">)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__next_interval</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__next_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Iterated the intervals on the buffer list. The list will be extended automatically if necessary.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span><span class="p">):</span>  <span class="c1"># Dynamically load next one from file.</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_expand</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__buffer_index</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_index</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">interval</span>
+
+    <span class="k">def</span> <span class="nf">__next_chrom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># Jump to next chromosome.</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="o">.</span><span class="n">chrom</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__interval</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__eoc</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__load_one</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ShiftLoader.get_shifts"><a class="viewcode-back" href="../../ginterval.html#ginterval.utils.ShiftLoader.get_shifts">[docs]</a>    <span class="k">def</span> <span class="nf">get_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="c1"># 1.</span>
+        <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
+
+            <span class="c1"># Init some variables.</span>
+            <span class="n">valid_start</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom_start</span> <span class="o">-</span> <span class="n">extend</span>
+            <span class="n">valid_end</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom_end</span> <span class="o">+</span> <span class="n">extend</span>
+            <span class="n">intervals</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">removable</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">invalid_number</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c1"># Reset the index.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__next_interval</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">chrom_end</span> <span class="o">&lt;</span> <span class="n">valid_start</span> <span class="ow">and</span> <span class="n">removable</span><span class="p">:</span>
+                    <span class="n">invalid_number</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">removable</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">chrom_start</span> <span class="o">&gt;</span> <span class="n">valid_end</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">intervals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
+
+            <span class="c1"># Remove the invalid intervals.</span>
+            <span class="k">if</span> <span class="n">invalid_number</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer</span><span class="p">[</span><span class="n">invalid_number</span><span class="p">:]</span>
+
+            <span class="k">return</span> <span class="n">intervals</span>
+
+        <span class="c1"># 2. The shift interval reach the end of the file or reference interval has not reach the buffer chromosome.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># 3. The buffer should jump to next chromosome and rerun this function.</span>
+        <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__next_chrom</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shifts</span><span class="p">(</span><span class="n">reference</span><span class="p">,</span> <span class="n">extend</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

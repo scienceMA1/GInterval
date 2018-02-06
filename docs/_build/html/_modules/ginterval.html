@@ -46,10 +46,12 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
 
 
 <div class="viewcode-block" id="GInterval"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval">[docs]</a><span class="k">class</span> <span class="nc">GInterval</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;GInterval is the basic element interval represent a range of genomic.</span>
+    <span class="sd">&quot;&quot;&quot;GInterval is the basic element interval represent a range</span>
+<span class="sd">    of genomic.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        x (int): The start position (0-base, included) of the interval.</span>
@@ -74,39 +76,61 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">blocks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="n">x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">blocks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The x and y or blocks must be provided!&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">x0</span> <span class="o">&lt;</span> <span class="n">y0</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The block.x value must be smaller than block.y value.&quot;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y0</span><span class="p">)</span>
                 <span class="n">lp</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">lp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">p</span> <span class="o">&lt;</span> <span class="n">lp</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position values of blocks are not sorted by oder.&quot;</span><span class="p">)</span>
                     <span class="n">lp</span> <span class="o">=</span> <span class="n">p</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too little blocks position!&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The x and y or blocks must be provided!&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The x position of GInterval must smaller than y position.&quot;</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position of GInterval can not be smaller than 0!&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The x, y position of GInterval is not consistent with blocks range!&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid blocks values!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The x position of GInterval must smaller than y position.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The position of GInterval can not be smaller than 0!&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">thick</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span> <span class="o">=</span> <span class="n">thick</span>
+            <span class="n">tx0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
+            <span class="n">ty0</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ty</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ty0</span> <span class="o">&gt;</span> <span class="n">tx0</span><span class="p">:</span>
+                <span class="n">flag_x</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">flag_y</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">bx</span><span class="p">,</span> <span class="n">by</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaps</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">flag_x</span> <span class="ow">and</span> <span class="n">bx</span> <span class="o">&lt;=</span> <span class="n">tx0</span> <span class="o">&lt;</span> <span class="n">by</span><span class="p">:</span>
+                        <span class="n">tx0</span> <span class="o">=</span> <span class="n">by</span>
+                        <span class="n">flag_x</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">flag_y</span> <span class="ow">and</span> <span class="n">bx</span> <span class="o">&lt;=</span> <span class="n">ty0</span> <span class="o">&lt;</span> <span class="n">by</span><span class="p">:</span>
+                        <span class="n">ty0</span> <span class="o">=</span> <span class="n">bx</span>
+                        <span class="n">flag_y</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">ty0</span> <span class="o">&gt;</span> <span class="n">tx0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="o">=</span> <span class="p">[</span><span class="n">tx0</span><span class="p">,</span> <span class="n">ty0</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -149,182 +173,237 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">thick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocks</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">block_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">gaps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">last_block</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-        <span class="n">blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">last_block</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">last_block</span> <span class="o">=</span> <span class="n">block</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GInterval</span><span class="p">(</span><span class="n">last_block</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">x</span><span class="p">))</span>
-                <span class="n">last_block</span> <span class="o">=</span> <span class="n">block</span>
-        <span class="k">return</span> <span class="n">results</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_info</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
 
 <div class="viewcode-block" id="GInterval.set_strand_sensitivity"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.set_strand_sensitivity">[docs]</a>    <span class="k">def</span> <span class="nf">set_strand_sensitivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sensitivity</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;strand_backup&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strand&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;strand_backup&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strand&#39;</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">sensitivity</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strand_backup&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;strand_backup&#39;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span></div>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        instance[1]</span>
+<span class="sd">        instance[2:8]</span>
+<span class="sd">        :param item:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">start</span> <span class="o">&gt;=</span> <span class="n">item</span><span class="o">.</span><span class="n">stop</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
             <span class="n">x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">start</span><span class="p">)</span>
             <span class="n">y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
 
+            <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+                <span class="n">x2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                <span class="n">y2</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">y2</span> <span class="o">&gt;</span> <span class="n">x2</span><span class="p">:</span>
+                    <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
             <span class="n">thick</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">thick</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="p">[</span><span class="n">x</span><span class="p">:</span><span class="n">y</span><span class="p">]</span>
+                <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span>
+                <span class="n">tx1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">tx</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                <span class="n">ty1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">ty</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ty1</span> <span class="o">&gt;</span> <span class="n">tx1</span><span class="p">:</span>
+                    <span class="n">thick</span> <span class="o">=</span> <span class="p">(</span><span class="n">tx1</span><span class="p">,</span> <span class="n">ty1</span><span class="p">)</span>
 
-            <span class="n">blocks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span>
-            <span class="n">bnum</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">bnum</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">None</span>
-            <span class="k">elif</span> <span class="n">bnum</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="n">thick</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">)</span>
-            <span class="n">blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">block</span><span class="p">[</span><span class="n">x</span><span class="p">:</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">]))</span>
+            <span class="k">return</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">blocks</span><span class="o">=</span><span class="n">blocks</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="n">thick</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">blocks</span><span class="o">=</span><span class="n">blocks</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="n">thick</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;The type of item is not supported!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        The strand of other will be ignored.</span>
+        <span class="sd">&quot;&quot;&quot;Rewrite the operation of GInterval plus GInterval.</span>
+<span class="sd">        In fact, it is a process that all blocks merge together.</span>
+<span class="sd">        The overlapped blocks will be combined to one.</span>
+<span class="sd">        The thick will be combine if exist.</span>
+<span class="sd">        The annotation information will be the same as left one.</span>
+<span class="sd">        The annotation information of `other` will be ignored.</span>
 
 <span class="sd">        :param other:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">last_block</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">integrated</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">blocks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">.</span><span class="n">x</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">last_block</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">last_block</span> <span class="o">=</span> <span class="n">block</span>
-                <span class="k">continue</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_block</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-                <span class="n">y</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">last_block</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">y</span> <span class="o">&gt;</span> <span class="n">x</span><span class="p">:</span>
-                    <span class="n">last_block</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="n">x1</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                <span class="n">y1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="n">y1</span><span class="p">:</span>
+                    <span class="n">x0</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+                    <span class="n">y0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">integrated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_block</span><span class="p">)</span>
-                    <span class="n">last_block</span> <span class="o">=</span> <span class="n">block</span>
-        <span class="k">if</span> <span class="n">last_block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">integrated</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_block</span><span class="p">)</span>
-        <span class="n">thicks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">thick</span><span class="p">]))</span>
+                    <span class="n">integrated</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">])</span>
+                    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">integrated</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">integrated</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
         <span class="n">thick</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">thicks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">thick</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">thicks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">thicks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">thicks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">thicks</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">blocks</span><span class="o">=</span><span class="n">integrated</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="n">thick</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">attribute</span><span class="p">)</span>
+        <span class="n">thick1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span>
+        <span class="n">thick2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">thick</span>
+        <span class="k">if</span> <span class="n">thick1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">thick2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">thick1</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">thick</span> <span class="o">=</span> <span class="n">thick2</span>
+            <span class="k">elif</span> <span class="n">thick2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">thick</span> <span class="o">=</span> <span class="n">thick1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">thick1</span>
+                <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">thick2</span>
+                <span class="n">thick</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">blocks</span><span class="o">=</span><span class="n">integrated</span><span class="p">,</span> <span class="n">thick</span><span class="o">=</span><span class="n">thick</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">bs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">b</span> <span class="o">=</span> <span class="n">bs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">b</span><span class="o">.</span><span class="n">_y</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">_x</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bs</span><span class="p">])</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        In generally, the base number is the total base number of all blocks.</span>
+<span class="sd">        :return: The number of base consist the GInterval.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">((</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GInterval.overlap"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.overlap">[docs]</a>    <span class="k">def</span> <span class="nf">overlap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        blocks1 = list(other.blocks)</span>
-<span class="sd">        blocks2 = list(self.blocks)</span>
-<span class="sd">        i1 = 0</span>
-<span class="sd">        i2 = 0</span>
-<span class="sd">        mi1 = len(blocks1)</span>
-<span class="sd">        mi2 = len(blocks2)</span>
-<span class="sd">        while i1 &lt; mi1 and i2 &lt; mi2:</span>
-<span class="sd">            b1 = blocks1[i1]</span>
-<span class="sd">            b2 = blocks2[i2]</span>
-<span class="sd">            if b1.y &lt;= b2.x:</span>
-<span class="sd">                i1 += 1</span>
-<span class="sd">            elif b1.x &gt;= b2.y:</span>
-<span class="sd">                i2 += 1</span>
-<span class="sd">            else:</span>
-<span class="sd">                return True</span>
-<span class="sd">        return False</span>
-<span class="sd">        &#39;&#39;&#39;</span></div>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The overlap of GInterval without blocks considered.</span>
+<span class="sd">        :param other:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GInterval.contain"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.contain">[docs]</a>    <span class="k">def</span> <span class="nf">contain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="n">blocks1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span>
-        <span class="n">blocks2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span>
-
-        <span class="n">i1</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">mi1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">b2</span> <span class="ow">in</span> <span class="n">blocks2</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The bases of other are all in self block intervals.</span>
+<span class="sd">        :param other:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">blocks1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">GInterval</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">))</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">i_max</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">find</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">i1</span> <span class="o">&gt;=</span> <span class="n">mi1</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">False</span>
-                <span class="n">b1</span> <span class="o">=</span> <span class="n">blocks1</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-                    <span class="n">i1</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">continue</span>
-                <span class="k">elif</span> <span class="n">b2</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">b1</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="n">b2</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="n">b1</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
+                <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">blocks1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;=</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="p">:</span>
+                    <span class="n">find</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">break</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="kc">False</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">i_max</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">find</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
         <span class="k">return</span> <span class="kc">True</span></div>
 
-<div class="viewcode-block" id="GInterval.coincide"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.coincide">[docs]</a>    <span class="k">def</span> <span class="nf">coincide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="GInterval.coincide"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.coincide">[docs]</a>    <span class="k">def</span> <span class="nf">coincide</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">adjacent1</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">adjacent2</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The other block interval is a continuous subset of self.</span>
+<span class="sd">        :param adjacent1:</span>
+<span class="sd">        :param adjacent2:</span>
+<span class="sd">        :param other:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">blocks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contain</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="n">blocks1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span>
+        <span class="n">blocks2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">blocks</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">adjacent1</span><span class="p">:</span>
+            <span class="n">blocks1</span> <span class="o">=</span> <span class="n">GInterval</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">adjacent2</span><span class="p">:</span>
+            <span class="n">blocks2</span> <span class="o">=</span> <span class="n">GInterval</span><span class="o">.</span><span class="n">combine_adjacent</span><span class="p">(</span><span class="n">blocks2</span><span class="p">)</span>
 
-        <span class="n">gaps1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gaps</span>
-        <span class="n">gaps2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">gaps</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps2</span><span class="p">):</span>
+        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
+        <span class="n">head_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">tail_allowed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span> <span class="ow">in</span> <span class="n">blocks2</span><span class="p">:</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">x2</span> <span class="o">&gt;=</span> <span class="n">y1</span><span class="p">:</span>
+                        <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="k">elif</span> <span class="n">x1</span> <span class="o">&gt;=</span> <span class="n">y2</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="kc">False</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="n">x2</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">==</span> <span class="n">y2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">head_allowed</span><span class="p">:</span>
+                                <span class="n">head_allowed</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="kc">False</span>
+                        <span class="k">elif</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">&gt;</span> <span class="n">y2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">tail_allowed</span><span class="p">:</span>
+                                <span class="n">head_allowed</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="kc">False</span>
+                        <span class="k">elif</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="n">x2</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">&gt;</span> <span class="n">y2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">head_allowed</span> <span class="ow">and</span> <span class="n">tail_allowed</span><span class="p">:</span>
+                                <span class="n">head_allowed</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="n">tail_allowed</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">return</span> <span class="kc">False</span>
+                        <span class="k">elif</span> <span class="n">x1</span> <span class="o">==</span> <span class="n">x2</span> <span class="ow">and</span> <span class="n">y1</span> <span class="o">==</span> <span class="n">y2</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">except</span> <span class="ne">StopIteration</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">g2</span> <span class="o">=</span> <span class="n">gaps2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">g1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gaps1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">g1</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">g2</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="n">g1</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">g2</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="n">i</span>
-                <span class="k">break</span>
-        <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="n">residual</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">gaps1</span><span class="p">)</span> <span class="o">-</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">residual</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">residual</span><span class="p">):</span>
-            <span class="n">g1</span> <span class="o">=</span> <span class="n">gaps1</span><span class="p">[</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">i</span><span class="p">]</span>
-            <span class="n">g2</span> <span class="o">=</span> <span class="n">gaps2</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">x</span> <span class="o">==</span> <span class="n">g2</span><span class="o">.</span><span class="n">x</span> <span class="ow">and</span> <span class="n">g1</span><span class="o">.</span><span class="n">y</span> <span class="o">==</span> <span class="n">g2</span><span class="o">.</span><span class="n">y</span><span class="p">):</span>
-                <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="GInterval.index"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The 0-base and strand-specific index correspond to specific position.</span>
+<span class="sd">        :param position:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span> <span class="o">&lt;=</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid position </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">position</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">_y</span> <span class="o">&lt;=</span> <span class="n">position</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;=</span> <span class="n">position</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
                 <span class="k">continue</span>
-            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">_x</span> <span class="o">&lt;=</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="n">block</span><span class="o">.</span><span class="n">_y</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">+=</span> <span class="n">position</span> <span class="o">-</span> <span class="n">block</span><span class="o">.</span><span class="n">_x</span>
+            <span class="k">elif</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">position</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="n">position</span> <span class="o">-</span> <span class="n">x</span>
                 <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -333,24 +412,34 @@
         <span class="k">return</span> <span class="n">index</span></div>
 
 <div class="viewcode-block" id="GInterval.position"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The genomic position of specific strand-specific index.</span>
+<span class="sd">        :param index:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">end_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="n">min_index</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">end_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">min_index</span> <span class="o">&lt;=</span> <span class="n">index</span> <span class="o">&lt;=</span> <span class="n">end_index</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid index </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">index</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Invalid index </span><span class="si">%d</span><span class="s1">. The valid index range is [</span><span class="si">%d</span><span class="s1">:</span><span class="si">%d</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">min_index</span><span class="p">,</span> <span class="n">end_index</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">-=</span> <span class="n">min_index</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reverse</span><span class="p">:</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">end_index</span> <span class="o">-</span> <span class="n">index</span>
-        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
-            <span class="n">index</span> <span class="o">-=</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">-=</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">index</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">block</span><span class="o">.</span><span class="n">_y</span> <span class="o">+</span> <span class="n">index</span>
+                <span class="k">return</span> <span class="n">y</span> <span class="o">+</span> <span class="n">index</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Unknown Exception!&#39;</span><span class="p">)</span></div>
 
     <span class="c1"># Additional methods.</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The strand-specific start genomic position (0-base, included).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
         <span class="k">else</span><span class="p">:</span>
@@ -358,6 +447,10 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The strand-specific end genomic position (0-base, included).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
@@ -365,46 +458,84 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">start_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The strand-specific index of start genomic position (0-base).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">end_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The strand-specific index of end genomic position (0-base).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">center_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The index of the strand-specific center genomic position. Blocks and Gaps are considered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">center_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The center genomic position of this GInterval instance. Blocks and Gaps are considered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">center_index</span><span class="p">)</span>
 
     <span class="c1"># Thick operation.</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">thick_start_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The genomic start position of thick interval. (0-base, included)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">return</span> <span class="n">x</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">thick_end_position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The genomic end position of thick interval. (0-base, included)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">y</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">return</span> <span class="n">x</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">thick_start_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The index of the genomic start position of thick relative to GInterval instance. (0-base)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thick_start_position</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">thick_end_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: The index of the genomic end position of thick relative to GInterval instance. (0-base)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thick_end_position</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GInterval.has_thick"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.has_thick">[docs]</a>    <span class="k">def</span> <span class="nf">has_thick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return: True when there is a thick interval in this GInterval instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
 
     <span class="c1"># Output format</span>
 
@@ -413,50 +544,96 @@
         <span class="k">if</span> <span class="n">ncol</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">chrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ncol</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">:</span>
-            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span>
             <span class="k">if</span> <span class="n">score</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">score</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
             <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">score</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strand</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ncol</span> <span class="o">&gt;=</span> <span class="mi">12</span><span class="p">:</span>
-            <span class="n">tx</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
-            <span class="n">ty</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
-            <span class="n">rgb</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;rgb&#39;</span><span class="p">]</span>
+            <span class="n">tx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span>
+            <span class="n">ty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y</span>
+            <span class="n">rgb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgb</span>
             <span class="k">if</span> <span class="n">rgb</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">rgb</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
-            <span class="n">bnum</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">sizes</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">starts</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="n">rgb</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span>
+            <span class="n">nblock</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">sizes</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">starts</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">tx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">x</span>
-                <span class="n">ty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span><span class="o">.</span><span class="n">y</span>
-            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
-                <span class="n">bnum</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">sizes</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
-                <span class="n">starts</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">,&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">_x</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
-            <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">rgb</span><span class="p">,</span> <span class="n">bnum</span><span class="p">,</span> <span class="n">sizes</span><span class="p">,</span> <span class="n">starts</span><span class="p">])</span>
+                <span class="n">tx</span><span class="p">,</span> <span class="n">ty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">thick</span>
+            <span class="k">for</span> <span class="n">bx</span><span class="p">,</span> <span class="n">by</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+                <span class="n">nblock</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">sizes</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">by</span> <span class="o">-</span> <span class="n">bx</span><span class="p">)</span>
+                <span class="n">starts</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%d</span><span class="s2">,&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_x</span><span class="p">)</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">tx</span><span class="p">,</span> <span class="n">ty</span><span class="p">,</span> <span class="n">rgb</span><span class="p">,</span> <span class="n">nblock</span><span class="p">,</span> <span class="n">sizes</span><span class="p">,</span> <span class="n">starts</span><span class="p">])</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">cols</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="GInterval.combine_adjacent"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.combine_adjacent">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">combine_adjacent</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">intervals</span><span class="p">):</span>
-        <span class="n">intervals</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">intervals</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">z</span><span class="p">:</span> <span class="n">z</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">last_interval</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">interval</span> <span class="ow">in</span> <span class="n">intervals</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">last_interval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">last_interval</span> <span class="o">=</span> <span class="n">interval</span>
+<div class="viewcode-block" id="GInterval.sorted_blocks"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.sorted_blocks">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sorted_blocks</span><span class="p">(</span><span class="n">blocks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Input a iterator of blocks and return the sorted iterator.</span>
+<span class="sd">        Sorted by x position.</span>
+<span class="sd">        :param blocks:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">blocks</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="GInterval.combine_blocks"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.combine_blocks">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">combine_blocks</span><span class="p">(</span><span class="n">blocks1</span><span class="p">,</span> <span class="n">blocks2</span><span class="p">,</span> <span class="n">adjacent</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param adjacent: If the adjacent blocks is allowed.</span>
+<span class="sd">        :param blocks1:</span>
+<span class="sd">        :param blocks2:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">blocks1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">blocks1</span><span class="p">)</span>
+        <span class="n">blocks2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">blocks2</span><span class="p">)</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">blocks1</span> <span class="o">+</span> <span class="n">blocks2</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="n">GInterval</span><span class="o">.</span><span class="n">sorted_blocks</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">interval</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">last_interval</span><span class="o">.</span><span class="n">y</span><span class="p">:</span>
-                    <span class="n">last_interval</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">last_interval</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_interval</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">interval</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">y0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">adjacent</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y0</span><span class="p">:</span>
+                        <span class="k">yield</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+                        <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">y0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y0</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_interval</span><span class="p">)</span>
-                    <span class="n">last_interval</span> <span class="o">=</span> <span class="n">interval</span>
-        <span class="k">if</span> <span class="n">last_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_interval</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">results</span></div></div>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+                    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GInterval.combine_adjacent"><a class="viewcode-back" href="../ginterval.html#ginterval.GInterval.combine_adjacent">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">combine_adjacent</span><span class="p">(</span><span class="n">blocks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Combine the adjacent blocks to one block.</span>
+<span class="sd">        :param blocks: the list of sorted blocks.</span>
+<span class="sd">        :return: </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">blocks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="n">y0</span><span class="p">:</span>
+                    <span class="n">y0</span> <span class="o">=</span> <span class="n">y</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+                    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+        <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span></div></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">g</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">gi1</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="n">gi2</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+
+    <span class="k">pass</span>
 </pre></div>
 
           </div>

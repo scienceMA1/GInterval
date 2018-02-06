@@ -1,183 +1,4 @@
-from ginterval import GInterval
-import os
-
-
-class Parser(object):
-    def __init__(self, path):
-        self.path = path
-
-
-class ParserFactory(object):
-    format_map = {
-        '.BED': "BED",
-        '.FQ': 'FASTQ',
-        '.FASTQ': 'FASTQ',
-        '.FA': 'FASTA',
-        '.FASTA': 'FASTA',
-        '.GTF': 'GTF'
-    }
-
-    def __init__(self, path, fmt=None):
-        self.path = path
-        self.fmt = fmt
-
-    @property
-    def parser(self):
-        if self.fmt is None:
-            self.fmt = ParserFactory.infer_format_by_suffix(self.path)
-        if self.fmt is None:
-            raise ValueError('Format is None and we can not infer the format!')
-        fmt = self.fmt
-        parser = None
-        if fmt == 'BED':
-            parser = BEDParser(self.path)
-        elif fmt == 'GTF':
-            parser = GTFParser(self.path)
-        if parser is None:
-            raise ValueError('We can not find proper Parser for %s format.' % fmt)
-        return parser
-
-    @classmethod
-    def infer_format_by_suffix(cls, path):
-        fmt = None
-        x = os.path.splitext(path)[1]
-        if x != '':
-            fmt = cls.format_map.get(x.upper())
-        return fmt
-
-    @classmethod
-    def infer_format_by_context(cls, path):
-        return None
-
-
-class BEDParser(Parser):
-    def __iter__(self):
-        with open(self.path) as f:
-            for line in f:
-                if line.startswith('#'):
-                    continue
-                cols = line.strip("\n").split("\t")
-                cnum = len(cols)
-                if cnum < 4:
-                    raise Exception("Record least than 4 columns")
-                parameters = dict()
-                parameters['chrom'] = cols[0]
-                start = int(cols[1])
-                end = int(cols[2])
-                parameters['x'] = start
-                parameters['y'] = end
-                parameters['name'] = cols[3]
-                if cnum > 4:
-                    if cols[4] != '.':
-                        parameters['score'] = float(cols[4])
-                    else:
-                        parameters['score'] = None
-                    parameters['strand'] = cols[5]
-                if cnum > 6:
-                    thick_x = int(cols[6])
-                    thick_y = int(cols[7])
-                    parameters['thick'] = None
-                    if thick_y > thick_x:
-                        parameters['thick'] = GInterval(thick_x, thick_y)
-                    parameters['rgb'] = cols[8]
-                    sizes = map(int, filter(lambda obj: obj != '', cols[10].split(',')))
-                    starts = map(int, filter(lambda obj: obj != '', cols[11].split(',')))
-                    intervals = []
-                    for bstart, bsize in zip(starts, sizes):
-                        x = start + bstart
-                        y = x + bsize
-                        intervals.append(GInterval(x, y))
-                    parameters['blocks'] = intervals
-
-                yield GInterval(**parameters)
-
-
-class GTFParser(Parser):
-    @classmethod
-    def process(cls, records):
-        cdss = []
-        exons = []
-        for record in records:
-            feature = record['feature']
-            if feature == 'exon':
-                exons.append(records)
-            elif feature == 'CDS':
-                cdss.append(record)
-
-    def __iter__(self):
-        with open(self.path) as f:
-            records = list()
-            for line in f:
-                if line.startswith('#'):
-                    continue
-                cols = line.strip("\n").split("\t")
-                parameters = dict()
-                parameters['chrom'] = cols[0]
-                parameters['source'] = cols[1]
-                parameters['feature'] = cols[2]
-                parameters['x'] = int(cols[3]) - 1
-                parameters['y'] = int(cols[4])
-                parameters['score'] = cols[5]
-                parameters['strand'] = cols[6]
-                parameters['frame'] = cols[7]
-                group = dict()
-                a = filter(lambda x: x != '', map(lambda y: y.strip(), cols[8].split(';')))
-                for b in a:
-                    b = b.strip()
-                    k, v = b.split()
-                    v = v.strip("\"")
-                    group[k] = v
-
-                parameters['group'] = group
-
-                interval = GInterval(**parameters)
-                if len(records) == 0:
-                    records.append(interval)
-                else:
-                    if interval['transcript_id'] == records[-1]['transcript_id']:
-                        records.append(interval)
-                    else:
-                        yield self.process(records)
-                        records = list()
-            if len(records) > 0:
-                yield self.process(records)
-                records = list()
-
-                '''cnum = len(cols)
-                if cnum < 4:
-                    raise Exception("Record least than 4 columns")
-                parameters = dict()
-                parameters['chrom'] = cols[0]
-                start = int(cols[1])
-                end = int(cols[2])
-                parameters['x'] = start
-                parameters['y'] = end
-                parameters['name'] = cols[3]
-                if cnum > 4:
-                    if cols[4] != '.':
-                        parameters['score'] = float(cols[4])
-                    else:
-                        parameters['score'] = None
-                    parameters['strand'] = cols[5]
-                if cnum > 6:
-                    thick_x = int(cols[6])
-                    thick_y = int(cols[7])
-                    parameters['thick'] = None
-                    try:
-                        parameters['thick'] = GInterval(thick_x, thick_y)
-                    except AssertionError as err:
-                        pass
-                    parameters['rgb'] = cols[8]
-                    sizes = map(int, filter(lambda obj: obj != '', cols[10].split(',')))
-                    starts = map(int, filter(lambda obj: obj != '', cols[11].split(',')))
-                    intervals = []
-                    for bstart, bsize in zip(starts, sizes):
-                        x = start + bstart
-                        y = x + bsize
-                        intervals.append(GInterval(x, y))
-                    parameters['blocks'] = intervals'''
-
-                # yield GInterval(**parameters)
+from ginterval.parser.factory import ParserFactory
 
 
 class Writer(object):
@@ -310,7 +131,7 @@ class ShiftLoader(object):
 
 
 if __name__ == '__main__':
-    fw = open('../data/combine.bed', 'w+')
+    '''fw = open('../data/combine.bed', 'w+')
     parser1 = ParserFactory("../data/no_cut8_1M_R1_uniq.100000.bed", fmt='BED').parser
     parser2 = ParserFactory("../data/no_cut8_1M_R2_uniq.100000.bed", fmt='BED').parser
     for g1, g2 in zip(parser1, parser2):
@@ -326,7 +147,14 @@ if __name__ == '__main__':
             continue
 
         fw.write((g1 + g2).to_bed_format_string() + "\n")
-    fw.close()
+    fw.close()'''
+
+    parser1 = ParserFactory("../../test/data/test.bed", fmt='BED').parser
+    for gi in parser1:
+        print(gi.to_bed_format_string())
+
+    pass
+
 
     # for interval in ParserFactory("../data/genecode.v27lift37", fmt='GTF').parser:
     #    print(interval.to_bed_format_string())

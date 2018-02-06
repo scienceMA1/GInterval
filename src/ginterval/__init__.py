@@ -8,7 +8,8 @@ from operator import itemgetter
 
 
 class GInterval(object):
-    """GInterval is the basic element interval represent a range of genomic.
+    """GInterval is the basic element interval represent a range
+    of genomic.
 
     Attributes:
         x (int): The start position (0-base, included) of the interval.
@@ -52,6 +53,9 @@ class GInterval(object):
                 lp = None
                 for p in self._block_info:
                     if lp is not None and p < lp:
+                        print(kwargs["name"])
+                        print(self._block_info)
+                        print(p,lp)
                         raise ValueError("The position values of blocks are not sorted by oder.")
                     lp = p
                 if len(self._block_info) < 2:
@@ -501,28 +505,42 @@ class GInterval(object):
         if ncol >= 4:
             cols.extend([self.chrom, self._x, self._y, self.name])
         if ncol >= 6:
-            score = self['score']
+            score = self.score
             if score is None:
                 score = '.'
             cols.extend([score, self.strand])
         if ncol >= 12:
-            tx = '.'
-            ty = '.'
-            rgb = self['rgb']
+            tx = self._x
+            ty = self._y
+            rgb = self.rgb
             if rgb is None:
-                rgb = '.'
-            bnum = 0
-            sizes = ''
-            starts = ''
+                rgb = "."
+            nblock = 0
+            sizes = ""
+            starts = ""
             if self.thick is not None:
-                tx = self.thick.x
-                ty = self.thick.y
-            for block in self.blocks:
-                bnum += 1
-                sizes += '%d,' % len(block)
-                starts += '%d,' % (block._x - self._x)
-            cols.extend([tx, ty, rgb, bnum, sizes, starts])
+                tx, ty = self.thick
+            for bx, by in self.blocks:
+                nblock += 1
+                sizes += "%d," % (by - bx)
+                starts += "%d," % (bx - self._x)
+            cols.extend([tx, ty, rgb, nblock, sizes, starts])
         return "\t".join(map(str, cols))
+
+    def to_gtf_format_string(self):
+        chrom = self.chrom
+        source = self.source
+        feature = self.feature
+        start = self._x + 1
+        end = self._y
+        score = self.score
+        strand = self.strand
+        frame = self.frame
+        texts = []
+        for k, v in self.group.items():
+            texts.append("%s \"%s\";" % (k, v))
+        groups = " ".join(texts)
+        return "\t".join(map(str, [chrom, source, feature, start, end, score, strand, frame, groups]))
 
     @staticmethod
     def sorted_blocks(blocks):
@@ -588,8 +606,7 @@ class GInterval(object):
 
 
 if __name__ == '__main__':
+    gi1 = GInterval(20, 30)
+    gi2 = GInterval(50, 60)
+
     pass
-    # gi1 = GInterval(blocks=[[10, 20], [30, 40], [50, 60]], thick=(25, 55))
-    # gi2 = GInterval(blocks=[[10, 20], [30, 40], [45, 65]], thick=(25, 55))
-    # gi3 = gi1 + gi2
-    # print(len(gi3))

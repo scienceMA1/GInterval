@@ -40,193 +40,14 @@
           <div class="body" role="main">
             
   <h1>Source code for ginterval.io</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">ginterval</span> <span class="k">import</span> <span class="n">GInterval</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">from</span> <span class="nn">ginterval.parser.factory</span> <span class="k">import</span> <span class="n">ParserFactory</span>
 
 
-<div class="viewcode-block" id="Parser"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.Parser">[docs]</a><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span></div>
-
-
-<div class="viewcode-block" id="ParserFactory"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.ParserFactory">[docs]</a><span class="k">class</span> <span class="nc">ParserFactory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="n">format_map</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;.BED&#39;</span><span class="p">:</span> <span class="s2">&quot;BED&quot;</span><span class="p">,</span>
-        <span class="s1">&#39;.FQ&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTQ&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;.FASTQ&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTQ&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;.FA&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTA&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;.FASTA&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTA&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;.GTF&#39;</span><span class="p">:</span> <span class="s1">&#39;GTF&#39;</span>
-    <span class="p">}</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="o">=</span> <span class="n">fmt</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="o">=</span> <span class="n">ParserFactory</span><span class="o">.</span><span class="n">infer_format_by_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Format is None and we can not infer the format!&#39;</span><span class="p">)</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fmt</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s1">&#39;BED&#39;</span><span class="p">:</span>
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">BEDParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">fmt</span> <span class="o">==</span> <span class="s1">&#39;GTF&#39;</span><span class="p">:</span>
-            <span class="n">parser</span> <span class="o">=</span> <span class="n">GTFParser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">parser</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;We can not find proper Parser for </span><span class="si">%s</span><span class="s1"> format.&#39;</span> <span class="o">%</span> <span class="n">fmt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">parser</span>
-
-<div class="viewcode-block" id="ParserFactory.infer_format_by_suffix"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.ParserFactory.infer_format_by_suffix">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">infer_format_by_suffix</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="n">fmt</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-            <span class="n">fmt</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">format_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">fmt</span></div>
-
-<div class="viewcode-block" id="ParserFactory.infer_format_by_context"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.ParserFactory.infer_format_by_context">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">infer_format_by_context</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">None</span></div></div>
-
-
-<div class="viewcode-block" id="BEDParser"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.BEDParser">[docs]</a><span class="k">class</span> <span class="nc">BEDParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
-                    <span class="k">continue</span>
-                <span class="n">cols</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">cnum</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">cnum</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Record least than 4 columns&quot;</span><span class="p">)</span>
-                <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;chrom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                <span class="n">end</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">cnum</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
-                        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-                <span class="k">if</span> <span class="n">cnum</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
-                    <span class="n">thick_x</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
-                    <span class="n">thick_y</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
-                    <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;thick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">thick_y</span> <span class="o">&gt;</span> <span class="n">thick_x</span><span class="p">:</span>
-                        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;thick&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="n">thick_x</span><span class="p">,</span> <span class="n">thick_y</span><span class="p">)</span>
-                    <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;rgb&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
-                    <span class="n">sizes</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cols</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)))</span>
-                    <span class="n">starts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cols</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)))</span>
-                    <span class="n">intervals</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="k">for</span> <span class="n">bstart</span><span class="p">,</span> <span class="n">bsize</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">starts</span><span class="p">,</span> <span class="n">sizes</span><span class="p">):</span>
-                        <span class="n">x</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">bstart</span>
-                        <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">bsize</span>
-                        <span class="n">intervals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">GInterval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
-                    <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;blocks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intervals</span>
-
-                <span class="k">yield</span> <span class="n">GInterval</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="GTFParser"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.GTFParser">[docs]</a><span class="k">class</span> <span class="nc">GTFParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
-<div class="viewcode-block" id="GTFParser.process"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.GTFParser.process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">records</span><span class="p">):</span>
-        <span class="n">cdss</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">exons</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">records</span><span class="p">:</span>
-            <span class="n">feature</span> <span class="o">=</span> <span class="n">record</span><span class="p">[</span><span class="s1">&#39;feature&#39;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">feature</span> <span class="o">==</span> <span class="s1">&#39;exon&#39;</span><span class="p">:</span>
-                <span class="n">exons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">feature</span> <span class="o">==</span> <span class="s1">&#39;CDS&#39;</span><span class="p">:</span>
-                <span class="n">cdss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
-
-    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">records</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
-                    <span class="k">continue</span>
-                <span class="n">cols</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
-                <span class="n">parameters</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;chrom&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;feature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;score&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;strand&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;frame&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
-                <span class="n">group</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                <span class="n">a</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">cols</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)))</span>
-                <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
-                    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                    <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="n">group</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-
-                <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
-
-                <span class="n">interval</span> <span class="o">=</span> <span class="n">GInterval</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">interval</span><span class="p">[</span><span class="s1">&#39;transcript_id&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">records</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;transcript_id&#39;</span><span class="p">]:</span>
-                        <span class="n">records</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
-                        <span class="n">records</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">records</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">records</span><span class="p">)</span>
-                <span class="n">records</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-
-                <span class="sd">&#39;&#39;&#39;cnum = len(cols)</span>
-<span class="sd">                if cnum &lt; 4:</span>
-<span class="sd">                    raise Exception(&quot;Record least than 4 columns&quot;)</span>
-<span class="sd">                parameters = dict()</span>
-<span class="sd">                parameters[&#39;chrom&#39;] = cols[0]</span>
-<span class="sd">                start = int(cols[1])</span>
-<span class="sd">                end = int(cols[2])</span>
-<span class="sd">                parameters[&#39;x&#39;] = start</span>
-<span class="sd">                parameters[&#39;y&#39;] = end</span>
-<span class="sd">                parameters[&#39;name&#39;] = cols[3]</span>
-<span class="sd">                if cnum &gt; 4:</span>
-<span class="sd">                    if cols[4] != &#39;.&#39;:</span>
-<span class="sd">                        parameters[&#39;score&#39;] = float(cols[4])</span>
-<span class="sd">                    else:</span>
-<span class="sd">                        parameters[&#39;score&#39;] = None</span>
-<span class="sd">                    parameters[&#39;strand&#39;] = cols[5]</span>
-<span class="sd">                if cnum &gt; 6:</span>
-<span class="sd">                    thick_x = int(cols[6])</span>
-<span class="sd">                    thick_y = int(cols[7])</span>
-<span class="sd">                    parameters[&#39;thick&#39;] = None</span>
-<span class="sd">                    try:</span>
-<span class="sd">                        parameters[&#39;thick&#39;] = GInterval(thick_x, thick_y)</span>
-<span class="sd">                    except AssertionError as err:</span>
-<span class="sd">                        pass</span>
-<span class="sd">                    parameters[&#39;rgb&#39;] = cols[8]</span>
-<span class="sd">                    sizes = map(int, filter(lambda obj: obj != &#39;&#39;, cols[10].split(&#39;,&#39;)))</span>
-<span class="sd">                    starts = map(int, filter(lambda obj: obj != &#39;&#39;, cols[11].split(&#39;,&#39;)))</span>
-<span class="sd">                    intervals = []</span>
-<span class="sd">                    for bstart, bsize in zip(starts, sizes):</span>
-<span class="sd">                        x = start + bstart</span>
-<span class="sd">                        y = x + bsize</span>
-<span class="sd">                        intervals.append(GInterval(x, y))</span>
-<span class="sd">                    parameters[&#39;blocks&#39;] = intervals&#39;&#39;&#39;</span></div>
-
-                <span class="c1"># yield GInterval(**parameters)</span>
-
-
-<div class="viewcode-block" id="Writer"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.Writer">[docs]</a><span class="k">class</span> <span class="nc">Writer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Writer"><a class="viewcode-back" href="../../ginterval.io.html#ginterval.io.Writer">[docs]</a><span class="k">class</span> <span class="nc">Writer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="ShiftLoader"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.ShiftLoader">[docs]</a><span class="k">class</span> <span class="nc">ShiftLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ShiftLoader"><a class="viewcode-back" href="../../ginterval.io.html#ginterval.io.ShiftLoader">[docs]</a><span class="k">class</span> <span class="nc">ShiftLoader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">    The reference and shift bed files must bed sorted by bedtools sort.</span>
@@ -308,7 +129,7 @@
                 <span class="k">break</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__load_one</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ShiftLoader.get_shifts"><a class="viewcode-back" href="../../ginterval.html#ginterval.io.ShiftLoader.get_shifts">[docs]</a>    <span class="k">def</span> <span class="nf">get_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="ShiftLoader.get_shifts"><a class="viewcode-back" href="../../ginterval.io.html#ginterval.io.ShiftLoader.get_shifts">[docs]</a>    <span class="k">def</span> <span class="nf">get_shifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reference</span><span class="p">,</span> <span class="n">extend</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="c1"># 1.</span>
         <span class="k">if</span> <span class="n">reference</span><span class="o">.</span><span class="n">chrom</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">__buffer_chrom</span><span class="p">:</span>
 
@@ -352,23 +173,30 @@
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">fw</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;../data/combine.bed&#39;</span><span class="p">,</span> <span class="s1">&#39;w+&#39;</span><span class="p">)</span>
-    <span class="n">parser1</span> <span class="o">=</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="s2">&quot;../data/no_cut8_1M_R1_uniq.100000.bed&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;BED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span>
-    <span class="n">parser2</span> <span class="o">=</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="s2">&quot;../data/no_cut8_1M_R2_uniq.100000.bed&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;BED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span>
-    <span class="k">for</span> <span class="n">g1</span><span class="p">,</span> <span class="n">g2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">parser1</span><span class="p">,</span> <span class="n">parser2</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">g1</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;E00509:219:HGGJGCCXY:2:1216:7669:29261/1&#39;</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">g1</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">g2</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
-            <span class="nb">print</span><span class="p">((</span><span class="n">g1</span> <span class="o">+</span> <span class="n">g2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+    <span class="sd">&#39;&#39;&#39;fw = open(&#39;../data/combine.bed&#39;, &#39;w+&#39;)</span>
+<span class="sd">    parser1 = ParserFactory(&quot;../data/no_cut8_1M_R1_uniq.100000.bed&quot;, fmt=&#39;BED&#39;).parser</span>
+<span class="sd">    parser2 = ParserFactory(&quot;../data/no_cut8_1M_R2_uniq.100000.bed&quot;, fmt=&#39;BED&#39;).parser</span>
+<span class="sd">    for g1, g2 in zip(parser1, parser2):</span>
+<span class="sd">        if g1.name == &#39;E00509:219:HGGJGCCXY:2:1216:7669:29261/1&#39;:</span>
+<span class="sd">            print(g1.to_bed_format_string())</span>
+<span class="sd">            print(g2.to_bed_format_string())</span>
+<span class="sd">            print((g1 + g2).to_bed_format_string())</span>
 
-        <span class="k">if</span> <span class="n">g1</span><span class="o">.</span><span class="n">chrom</span> <span class="o">!=</span> <span class="n">g2</span><span class="o">.</span><span class="n">chrom</span><span class="p">:</span>
-            <span class="k">continue</span>
+<span class="sd">        if g1.chrom != g2.chrom:</span>
+<span class="sd">            continue</span>
 
-        <span class="k">if</span> <span class="n">g1</span><span class="o">.</span><span class="n">forward</span> <span class="o">==</span> <span class="n">g2</span><span class="o">.</span><span class="n">forward</span><span class="p">:</span>
-            <span class="k">continue</span>
+<span class="sd">        if g1.forward == g2.forward:</span>
+<span class="sd">            continue</span>
 
-        <span class="n">fw</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="n">g1</span> <span class="o">+</span> <span class="n">g2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">fw</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="sd">        fw.write((g1 + g2).to_bed_format_string() + &quot;\n&quot;)</span>
+<span class="sd">    fw.close()&#39;&#39;&#39;</span>
+
+    <span class="n">parser1</span> <span class="o">=</span> <span class="n">ParserFactory</span><span class="p">(</span><span class="s2">&quot;../../test/data/test.bed&quot;</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;BED&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">parser</span>
+    <span class="k">for</span> <span class="n">gi</span> <span class="ow">in</span> <span class="n">parser1</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">gi</span><span class="o">.</span><span class="n">to_bed_format_string</span><span class="p">())</span>
+
+    <span class="k">pass</span>
+
 
     <span class="c1"># for interval in ParserFactory(&quot;../data/genecode.v27lift37&quot;, fmt=&#39;GTF&#39;).parser:</span>
     <span class="c1">#    print(interval.to_bed_format_string())</span>
