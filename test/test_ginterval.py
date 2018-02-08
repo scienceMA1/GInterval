@@ -1,5 +1,6 @@
 from ginterval import GInterval
-from ginterval.utils import SequenceExtractor
+from gseqtools import SequenceExtractor
+
 
 def test_ginterval():
     i = GInterval(10, 20)
@@ -78,8 +79,6 @@ def test_sequence_extractor():
     g2 = GInterval(10, 20, chrom="chr2", strand="-")
     assert se.get_sequence(g2) == "Gcgactacgc"
 
+
 def test_shift_loader():
     pass
-
-
-

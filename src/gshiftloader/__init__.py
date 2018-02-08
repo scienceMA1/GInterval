@@ -1,35 +1,8 @@
-from Bio.Seq import Seq
-from pysam import FastaFile
-
-
-class SequenceExtractor(object):
-    """
-
-    Extracting sequences from FASTA file by interval objects.
-
-    """
-
-    def __init__(self, path):
-        self._fasta = FastaFile(path)
-
-    def get_sequence(self, gi):
-        seqs = []
-        for x, y in gi.blocks:
-            seqs.append(self._fasta.fetch(gi.chrom, x, y))
-        seq = Seq("".join(seqs))
-        if gi.reverse:
-            seq = seq.reverse_complement()
-        return seq
-
-    def close(self):
-        if not self._fasta.closed:
-            self._fasta.close()
-
-    def __del__(self):
-        self.close()
+import os
 
 
 class ShiftLoader(object):
+    pass
     """
 
     The reference and shift bed files must bed sorted by bedtools sort.
@@ -40,7 +13,7 @@ class ShiftLoader(object):
 
     """
 
-    def __init__(self, path):
+    '''def __init__(self, path):
         super(ShiftLoader, self).__init__()
 
         assert os.path.exists(path)
@@ -156,4 +129,4 @@ class ShiftLoader(object):
         # 3. The buffer should jump to next chromosome and rerun this function.
         if reference.chrom > self.__buffer_chrom:
             self.__next_chrom()
-            return self.get_shifts(reference, extend)
+            return self.get_shifts(reference, extend)'''

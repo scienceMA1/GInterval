@@ -1,33 +1,71 @@
-"""GInterval object represent a interval on the genomic coordination.
-It can consist many blocks (smaller interval which only contain x and y value).
-Additional information, such as chromosome, name and strand, are also contained in the GInterval objects.
+"""
+:class:`GInterval` class represents a specific interval on the genome. The basic
+information contains the coordinates (x, y) of the interval, chromosome
+name, strand information ("+" or "-") and interval name. Any additional
+information can be added to the instance, for example, score and source.
+
+A basic `GInterval` instance is consisted of many blocks (at least one block,
+default is itself) and one thick (optional). So there can be gaps (between
+two nearby blocks) in the genome interval.
+
+.. image:: images/GInterval_mRNA.png
+
+The `GInterval` provided a `conversion system` which can provides conversion
+between coordinates and strand-specific index (0-base).
+
+The `GInterval` instance support addition operations. In fact, the blocks
+of two instances are summed, and the overlapping blocks will become a
+single extended block.
+
+In order to clarify the relationship between the two intervals, `GInterval`
+instance supports the judgment of three kinds of relations (overlap, contain
+and coincide).
+
+Examples:
+
+    1. This example demonstrates how to create a :class:`GInterval` instance.
+
+    >>> # Create an instance with one block and without thick interval.
+    >>> g1 = GInterval(10, 20, chrom="chr1", name="interval1", strand="+")
+    >>> # Create an instance with multi-block and thick interval. The x and y can be omitted.
+    >>> g2 = GInterval(blocks=[(10, 20), (30, 40), (50, 60)], thick=(15, 35))
+
+    2. This example demonstrates the creation with additional information.
+
+    >>> g = GInterval(10, 20, score=50, color="red")
+    >>> g.score
+    50
+    >>> g.color
+    "red"
+
+    3. This example demonstrates the addition operation.
+
+    >>> g1 = GInterval(20, 30)
+    >>> g2 = GInterval(40, 50)
+    >>> g3 = GInterval(blocks=[(20,30), (40, 50)])
+    >>> g = g1 + g2         # The g is equal to g3.
 
 """
+
 import numpy as np
 from operator import itemgetter
 
 
 class GInterval(object):
-    """GInterval is the basic element interval represent a range
-    of genomic.
+    """
 
-    Attributes:
-        x (int): The start position (0-base, included) of the interval.
-        y (int): The end position (0-base, excluded) of the interval.
-        chrom (str): The chromosome on which the interval is located.
-        name (str): The name of the interval.
-        strand (str): The value is "+" or "-".
-        forward (boolean): True when the strand is "+".
-        reverse (boolean): True when the strand is "-".
+    Args:
 
-    Examples:
-        Create a GInterval instance before any operation:
+        x (int, optional): The start position (0-base, included) of the interval. If omitted, blocks must be provided.
+        y (int, optional): The end position (0-base, excluded) of the interval. If omitted, blocks must be provided.
+        blocks (list, optional): The list contains the blocks` coordination. If omitted, x and y must be provided.
+        thick (list, optional): The coordination of thick interval.
+        **kwargs (dict, optional): The additional information of the GInterval instance.
 
-        g = GInterval(10, 20)
+    Notes:
 
-        g = GInterval(blocks=[10, 20, 30, 40])
-
-
+        1. You must provide one of blocks or x and y.
+        2. If blocks is provided, the coordination must be sorted and overlapping between blocks is not allowed. Ginterval can be.
 
     """
 
@@ -55,7 +93,7 @@ class GInterval(object):
                     if lp is not None and p < lp:
                         print(kwargs["name"])
                         print(self._block_info)
-                        print(p,lp)
+                        print(p, lp)
                         raise ValueError("The position values of blocks are not sorted by oder.")
                     lp = p
                 if len(self._block_info) < 2:
@@ -95,64 +133,61 @@ class GInterval(object):
 
     @property
     def x(self):
-        """
-
-        :return: The x position (0-base included) of the interval instance.
-        """
+        """int: The x position (0-base included) of the interval instance."""
         return self._x
 
     @property
     def y(self):
-        """
-
-        :return: The y position (0-base excluded) of the interval instance.
-        """
+        """int: The y position (0-base excluded) of the interval instance."""
         return self._y
 
     @property
     def strand(self):
-        """
-
-        :return: The strand information of GInterval instance "+" or "-". Default "+"
-        """
+        """str: The strand information of GInterval instance "+" or "-". Default "+"."""
         return self._annotations.get('strand', '+')
 
     @property
     def forward(self):
-        """
-
-        :return: True when the strand equal to "+"
-        """
+        """bool: True when the strand equal to "+"."""
         return self.strand == '+'
 
     @property
     def reverse(self):
-        """
-
-        :return: True when the strand equal to "-".
-        """
+        """bool: True when the strand equal to "-"."""
         return self.strand == '-'
 
     @property
     def thick(self):
+        """tuple: The coordination of thick interval (x, y). None if not exist."""
         return self._thick
 
     @property
     def blocks(self):
+        """list: The list contains the coordination of all blocks. [(x1, y1),...,(xn, yn)]."""
         for i in range(0, len(self._block_info), 2):
             yield (self._block_info[i], self._block_info[i + 1])
 
     @property
     def block_count(self):
+        """int: The number of blocks."""
         return len(self._block_info) // 2
 
     @property
     def gaps(self):
+        """list: The list contains the coordination of all gap intervals. [(x1, y1),..., (xn, yn)]."""
         if self._block_info is not None:
             for i in range(1, len(self._block_info) - 2, 2):
                 yield (self._block_info[i], self._block_info[i + 1])
 
     def set_strand_sensitivity(self, sensitivity=True):
+        """
+
+        Set the GInterval is strand-sensitive. This will affect many operations.
+
+        Args:
+            sensitivity (bool, optional): The GInterval instance is strand-sensitive.
+
+        """
         self._annotations.setdefault('strand_backup', self._annotations.get('strand'))
         if sensitivity:
             self._annotations['strand'] = self._annotations.get('strand_backup')

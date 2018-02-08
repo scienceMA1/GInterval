@@ -1,13 +1,14 @@
-from ginterval.parser import Parser
 from ginterval import GInterval
+from gparser import Parser
+
 
 class BEDParser(Parser):
     """
-    BEDParser is a iterable parser which create :class:`ginterval.GInterval` instance
+    BEDParser is a iterable gparser which create :class:`ginterval.GInterval` instance
     from BED format file. The lines in file start with "#" will be
     ignored.
 
-    BED4, BED6 and BED12 are supported. The parser will infers
+    BED4, BED6 and BED12 are supported. The gparser will infers
     which is the real format according to columns number and decides
     how to create GInterval instance. If the provided ncol is less
     than real column number, the residual columns will be ignored.
@@ -19,18 +20,18 @@ class BEDParser(Parser):
     Examples:
         This example will demonstrates how to obtain GInterval
         instance from BED format file. If the real column number
-        is less than ncol, parser will create GInterval instance
+        is less than ncol, gparser will create GInterval instance
         by real column number.
 
-        >>> parser = BEDParser("test/test.bed", ncol=12)
-        >>> for gi in parser:
+        >>> gparser = BEDParser("test/test.bed", ncol=12)
+        >>> for gi in gparser:
         >>>     print(gi.to_bed_format_string())
 
         This example will demonstrates that if the real column number
         is larger than ncol, the extra will be ignored.
 
-        >>> parser = BEDParser("test/test.bed", ncol=4)
-        >>> for gi in parser:
+        >>> gparser = BEDParser("test/test.bed", ncol=4)
+        >>> for gi in gparser:
         >>>     print(gi.to_bed_format_string())
 
     """

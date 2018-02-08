@@ -1,29 +1,52 @@
-from ginterval.parser import Parser
+# -*- coding: utf-8 -*-
+
+from collections import defaultdict
+
 from ginterval import GInterval
-from operator import itemgetter
+from gparser import Parser
+
 
 class GTFParser(Parser):
     @staticmethod
     def _process_features(features):
-        cdss = []
-        exons = []
-        for feature in features:
-            feature_name = feature.feature
-            if feature_name == 'exon':
-                exons.append((feature.x, feature.y))
-            elif feature_name == 'CDS':
-                cdss.append((feature.x, feature.y))
-        thick = None
-        if len(cdss) > 0:
-            tx = min((b[0] for b in cdss))
-            ty = max((b[1] for b in cdss))
-            thick = (tx, ty)
-        feature = features[0]
-        exons = GInterval.sorted_blocks(exons)
-        exons = list(GInterval.combine_blocks(exons, exons))
+        """
 
-        return GInterval(blocks=exons, thick=thick, chrom=feature.chrom,
-                         name=feature.group["transcript_id"], strand=feature.strand, score=feature.score)
+        Create one GInterval instance from multi gtf feature
+        records.
+
+        Notes:
+            The features has the same transcript_id values. But
+            they may belong to different chromosome.
+
+        :param features: A list of gtf records that has the same transcript_id.
+        :return:
+        """
+        chromosomes = defaultdict(list)
+        for feature in features:
+            chromosomes[feature.chrom].append(feature)
+
+        for chrom, features in chromosomes.items():
+
+            cdss = []
+            exons = []
+            for feature in features:
+                feature_name = feature.feature
+                if feature_name == 'exon':
+                    exons.append((feature.x, feature.y))
+                elif feature_name == 'CDS':
+                    cdss.append((feature.x, feature.y))
+            thick = None
+            if len(cdss) > 0:
+                tx = min((b[0] for b in cdss))
+                ty = max((b[1] for b in cdss))
+                thick = (tx, ty)
+            feature = features[0]
+            exons = GInterval.sorted_blocks(exons)
+            exons = list(GInterval.combine_blocks(exons, exons))
+
+            yield GInterval(blocks=exons, thick=thick, chrom=chrom,
+                            name=feature.group["transcript_id"], strand=feature.strand,
+                            score=feature.score)
 
     @staticmethod
     def __parse_one_row(row):
@@ -68,11 +91,13 @@ class GTFParser(Parser):
                     if gi.group["transcript_id"] == features[-1].group["transcript_id"]:
                         features.append(gi)
                     else:
-                        yield self._process_features(features)
+                        for i in self._process_features(features):
+                            yield i
                         features = [gi]
 
             if len(features) > 0:
-                yield self._process_features(features)
+                for i in self._process_features(features):
+                    yield i
 
     @staticmethod
     def sort_gtf_by_transcript_id(infile, outfile):
@@ -92,13 +117,25 @@ class GTFParser(Parser):
 
 
 if __name__ == '__main__':
-    '''parser = GTFParser("../../../test/data/test.gtf")
+    pass
+
+    '''gparser = GTFParser("../../../test/data/test.gtf")
     with open("../../../test/data/test.gtf.bed", "w+") as fw:
-        for gi in parser:
+        for gi in gparser:
             fw.write(gi.to_bed_format_string() + "\n")'''
 
-    file1 = "../../../data/genecode.v27lift37.sorted.gtf"
+    '''from collections import Counter, defaultdict
+
+    g1 = GInterval(10, 20, chrom="chr1")
+    g2 = GInterval(10, 20, chrom="chr1")
+    g3 = GInterval(10, 20, chrom="chr2")
+    d = defaultdict(list)
+    for g in [g1, g2, g3]:
+        d[g.chrom].append(g)
+    print(d)'''
+
+    '''file1 = "../../../data/genecode.v27lift37.sorted.gtf"
     file2 = "../../../data/genecode.v27lift37.sorted_by_transcript_id.gtf"
     file3 = "../../../data/genecode.v27lift37.sorted_by_transcript_id.bed"
-    # GTFParser.sort_gtf_by_transcript_id(file1, file2)
-    GTFParser.convert_gtf_to_bed(file2, file3)
+    GTFParser.sort_gtf_by_transcript_id(file1, file2)
+    GTFParser.convert_gtf_to_bed(file2, file3)'''

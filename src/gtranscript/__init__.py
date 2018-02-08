@@ -1,4 +1,4 @@
-from ginterval.io import ParserFactory
+from gparser.factory import ParserFactory
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -128,7 +128,7 @@ class TranscriptAnalysis(object):
 
 
 if __name__ == '__main__':
-    ta = TranscriptAnalysis("../data/hg19_knownGene.bed")
+    ta = TranscriptAnalysis("../../data/shanting/hg19_knownGene.bed")
     print(ta)
     ta.plot()
     pass

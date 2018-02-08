@@ -1,6 +1,7 @@
 import os
-from ginterval.parser.bed_parser import BEDParser
-from ginterval.parser.gtf_parser import GTFParser
+
+from gparser.bed import BEDParser
+from gparser.gtf import GTFParser
 
 
 class ParserFactory(object):
@@ -22,7 +23,7 @@ class ParserFactory(object):
 
     @property
     def parser(self):
-        """Parser: The iterable parser which creates :class:`GInterval` instance
+        """Parser: The iterable gparser which creates :class:`GInterval` instance
         for format-specific file.
 
         Raises:
